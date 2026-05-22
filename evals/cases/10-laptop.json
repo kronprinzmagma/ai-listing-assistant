@@ -1,0 +1,31 @@
+{
+  "id": "10-laptop",
+  "product": "Lenovo ThinkPad X1 Carbon Gen 9",
+  "metadata": {
+    "category": "Laptops",
+    "condition": "akzeptabel",
+    "priceRangeCHF": [400, 600]
+  },
+  "imagePaths": [
+    "evals/cases/images/10-laptop/photo1.jpg",
+    "evals/cases/images/10-laptop/photo2.jpg"
+  ],
+  "goldListing": {
+    "de": {
+      "title": "Lenovo ThinkPad X1 Carbon Gen 9 – ok",
+      "description": "Lenovo ThinkPad X1 Carbon Gen 9, i7 16GB 512GB SSD. Kratzer auf dem Deckel, Display ohne Defekte. Akku hält ca. 3-4 Stunden. Tastatur und Trackpad funktionieren. Versand möglich.",
+      "category": "Laptops",
+      "condition": "akzeptabel",
+      "price": 480,
+      "shipping": "CH-Post B-Post, ca. 10 CHF"
+    },
+    "fr": {
+      "title": "Lenovo ThinkPad X1 Carbon Gen 9 – ok",
+      "description": "Lenovo ThinkPad X1 Carbon Gen 9, i7 16Go 512Go SSD. Rayures sur le couvercle, écran sans défauts. Batterie 3-4h d'autonomie. Clavier et trackpad fonctionnels. Envoi possible.",
+      "category": "Ordinateurs portables",
+      "condition": "état acceptable",
+      "price": 480,
+      "shipping": "La Poste B, env. 10 CHF"
+    }
+  }
+}

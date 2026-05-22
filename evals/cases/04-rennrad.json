@@ -1,0 +1,31 @@
+{
+  "id": "04-rennrad",
+  "product": "Trek Émonda SL5 Rennrad 56cm",
+  "metadata": {
+    "category": "Fahrrad",
+    "condition": "gut",
+    "priceRangeCHF": [600, 900]
+  },
+  "imagePaths": [
+    "evals/cases/images/04-rennrad/photo1.jpg",
+    "evals/cases/images/04-rennrad/photo2.jpg"
+  ],
+  "goldListing": {
+    "de": {
+      "title": "Trek Émonda SL5 Rennrad 56cm – gut",
+      "description": "Trek Émonda SL5 in Rahmengrösse 56cm, Shimano 105 Gruppe. Normale Gebrauchsspuren, Rahmen ohne Risse. Neue Bremsbeläge. Ideal für Strassenrennen. Selbstabholung in Bern oder Versand.",
+      "category": "Fahrrad",
+      "condition": "gut",
+      "price": 750,
+      "shipping": "Abholung in Bern oder Versand auf Anfrage"
+    },
+    "fr": {
+      "title": "Trek Émonda SL5 vélo course 56cm – bon",
+      "description": "Trek Émonda SL5 taille 56cm, groupe Shimano 105. Traces d'usage normales, cadre sans fissures. Patins de frein neufs. Idéal pour la route. Enlèvement à Berne ou envoi.",
+      "category": "Vélos",
+      "condition": "bon état",
+      "price": 750,
+      "shipping": "Enlèvement à Berne ou envoi sur demande"
+    }
+  }
+}

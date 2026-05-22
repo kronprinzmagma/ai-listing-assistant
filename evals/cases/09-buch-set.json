@@ -1,0 +1,30 @@
+{
+  "id": "09-buch-set",
+  "product": "Harry Potter Bücher 1-7 Deutsch",
+  "metadata": {
+    "category": "Bücher",
+    "condition": "gut",
+    "priceRangeCHF": [20, 40]
+  },
+  "imagePaths": [
+    "evals/cases/images/09-buch-set/photo1.jpg"
+  ],
+  "goldListing": {
+    "de": {
+      "title": "Harry Potter Bände 1-7 deutsch – gut",
+      "description": "Harry Potter Buchserie, alle 7 Bände auf Deutsch. Taschenbuchausgabe, gelesen aber gut erhalten. Keine fehlenden Seiten, leichte Gebrauchsspuren an Einbänden. Versand per CH-Post.",
+      "category": "Bücher",
+      "condition": "gut",
+      "price": 28,
+      "shipping": "CH-Post B-Post, ca. 5 CHF"
+    },
+    "fr": {
+      "title": "Harry Potter tomes 1-7 allemand – bon",
+      "description": "Série Harry Potter, les 7 tomes en allemand. Edition poche, lus mais en bon état. Aucune page manquante, légères traces d'usure sur les couvertures. Envoi postal.",
+      "category": "Livres",
+      "condition": "bon état",
+      "price": 28,
+      "shipping": "La Poste B, env. 5 CHF"
+    }
+  }
+}

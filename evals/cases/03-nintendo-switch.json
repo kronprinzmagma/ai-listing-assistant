@@ -1,0 +1,31 @@
+{
+  "id": "03-nintendo-switch",
+  "product": "Nintendo Switch OLED",
+  "metadata": {
+    "category": "Spielzeug",
+    "condition": "wie neu",
+    "priceRangeCHF": [200, 280]
+  },
+  "imagePaths": [
+    "evals/cases/images/03-nintendo-switch/photo1.jpg",
+    "evals/cases/images/03-nintendo-switch/photo2.jpg"
+  ],
+  "goldListing": {
+    "de": {
+      "title": "Nintendo Switch OLED weiss – wie neu",
+      "description": "Nintendo Switch OLED in weiss, kaum benutzt. Alle Zubehörteile vorhanden: Dock, Joy-Cons, HDMI-Kabel, Netzteil. Kein Kratzer auf dem OLED-Display. Versand per CH-Post.",
+      "category": "Spielzeug",
+      "condition": "wie neu",
+      "price": 250,
+      "shipping": "CH-Post B-Post, ca. 7 CHF"
+    },
+    "fr": {
+      "title": "Nintendo Switch OLED blanc – comme neuf",
+      "description": "Nintendo Switch OLED en blanc, très peu utilisée. Tous les accessoires inclus : dock, Joy-Cons, câble HDMI, adaptateur. Écran OLED sans rayures. Envoi par La Poste.",
+      "category": "Jeux & Jouets",
+      "condition": "comme neuf",
+      "price": 250,
+      "shipping": "La Poste B, env. 7 CHF"
+    }
+  }
+}

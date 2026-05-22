@@ -1,0 +1,30 @@
+Erstelle ein vollständiges Inserat für ricardo.ch auf Deutsch und Französisch.
+
+Produkt-Informationen:
+- Objekt: {{object}}
+- Zustand: {{condition}}
+- Kategorie: {{category}}
+- Titel-Entwurf: {{titleDraft}}
+- Beschreibungs-Entwurf: {{descriptionDraft}}
+
+{{answeredQA}}
+
+Titelregeln (für BEIDE Sprachen):
+- Genau 40–55 Zeichen
+- Format: [Marke] [Modell] [wichtigstes Feature-Keyword] – [Zustand]
+- Feature-Keyword: wähle das wichtigste technische Detail (z.B. "Noise Cancelling", "128GB", "OLED", "Carbon")
+- Beispiel DE: "Sony WH-1000XM4 Noise Cancelling – wie neu"  (43 Zeichen)
+- Beispiel DE: "Nintendo Switch OLED weiss – wie neu"  (36 Zeichen → ergänze Feature)
+- Zustand im Titel: verwende exakt die Zustandsbezeichnung aus dem Feld "Zustand" oben
+- Kein Satzzeichen am Anfang, kein "TOP", "!!!", "super"
+
+Beschreibungsregeln:
+- Maximal 400 Zeichen, 3 Sätze
+- Satz 1: Zustand + wichtigstes Merkmal sachlich formuliert
+- Satz 2: Zubehör und Vollständigkeit (was ist dabei, was fehlt)
+- Satz 3: Versanddetails exakt: "Versand CH-Post A-Post 5 CHF" oder "Selbstabholung [Ort]"
+- Kein Werbejargon: keine Ausrufezeichen, keine subjektiven Adjektive ("toll", "super", "hochwertig")
+
+Kategorie: exakt aus dieser Liste wählen: Smartphones, Laptops, Tablets, Kameras, Audio, Möbel, Küche, Dekoration, Spielzeug, Kinderkleidung, Sport, Fahrrad, Kleidung, Schuhe, Bücher, Filme
+
+Preis: realistischer Schweizer Secondhand-Preis in CHF (Zahl, kein Währungszeichen)

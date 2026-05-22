@@ -1,0 +1,50 @@
+{
+  "name": "verkaufshilfe-via-foto",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "eval": "tsx evals/run-eval.ts v1",
+    "eval:v1": "tsx evals/run-eval.ts v1",
+    "eval:v2": "tsx evals/run-eval.ts v2",
+    "eval:v3": "tsx evals/run-eval.ts v3",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*": [
+      "secretlint --no-glob"
+    ]
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.1",
+    "next": "16.2.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "sharp": "^0.34.5",
+    "uuid": "^13.0.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@secretlint/secretlint-rule-anthropic": "^13.0.2",
+    "@secretlint/secretlint-rule-preset-recommend": "^13.0.2",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
+    "@vitest/coverage-v8": "^4.1.7",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "promptfoo": "^0.121.12",
+    "secretlint": "^13.0.2",
+    "tsx": "^4.22.3",
+    "typescript": "^5",
+    "vitest": "^4.1.7"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "id": "06-kaffeemaschine",
+  "product": "DeLonghi Magnifica S Kaffeevollautomat",
+  "metadata": {
+    "category": "Küche",
+    "condition": "gut",
+    "priceRangeCHF": [150, 250]
+  },
+  "imagePaths": [
+    "evals/cases/images/06-kaffeemaschine/photo1.jpg",
+    "evals/cases/images/06-kaffeemaschine/photo2.jpg"
+  ],
+  "goldListing": {
+    "de": {
+      "title": "DeLonghi Magnifica S Kaffeevollautomat",
+      "description": "DeLonghi Magnifica S Kaffeevollautomat, gut erhalten. Regelmässig gewartet und entkalkt. Mahlwerk und Milchsystem funktionieren einwandfrei. Abholung in Zürich oder Versand per Post.",
+      "category": "Küche",
+      "condition": "gut",
+      "price": 190,
+      "shipping": "CH-Post B-Post, ca. 12 CHF"
+    },
+    "fr": {
+      "title": "DeLonghi Magnifica S machine café auto",
+      "description": "Machine à café automatique DeLonghi Magnifica S, bon état. Entretenue et détartrée régulièrement. Broyeur et système lait fonctionnent parfaitement. Enlèvement à Zurich ou envoi.",
+      "category": "Cuisine",
+      "condition": "bon état",
+      "price": 190,
+      "shipping": "La Poste B, env. 12 CHF"
+    }
+  }
+}

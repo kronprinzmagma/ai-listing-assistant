@@ -1,0 +1,30 @@
+{
+  "id": "05-winterjacke",
+  "product": "Arc'teryx Beta AR Jacke Grösse M",
+  "metadata": {
+    "category": "Kleidung",
+    "condition": "gut",
+    "priceRangeCHF": [200, 350]
+  },
+  "imagePaths": [
+    "evals/cases/images/05-winterjacke/photo1.jpg"
+  ],
+  "goldListing": {
+    "de": {
+      "title": "Arc'teryx Beta AR Jacke Gr. M – gut",
+      "description": "Arc'teryx Beta AR Hardshelljacke in Grösse M. GORE-TEX Membran funktioniert einwandfrei. Leichte Gebrauchsspuren an den Ärmeln. Kein Riss, alle Reissverschlüsse laufen. Versand per CH-Post.",
+      "category": "Kleidung",
+      "condition": "gut",
+      "price": 280,
+      "shipping": "CH-Post B-Post, ca. 8 CHF"
+    },
+    "fr": {
+      "title": "Arc'teryx Beta AR veste taille M – bon",
+      "description": "Veste hardshell Arc'teryx Beta AR taille M. Membrane GORE-TEX parfaitement fonctionnelle. Légères traces d'usure aux manches. Pas de déchirure, toutes fermetures éclair OK. Envoi postal.",
+      "category": "Vêtements",
+      "condition": "bon état",
+      "price": 280,
+      "shipping": "La Poste B, env. 8 CHF"
+    }
+  }
+}

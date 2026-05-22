@@ -1,0 +1,15 @@
+Erstelle ein vollständiges Inserat für ricardo.ch auf Deutsch und Französisch.
+
+Analyse:
+- Objekt: {{object}}
+- Zustand: {{condition}}
+- Kategorie: {{category}}
+- Titel-Entwurf: {{titleDraft}}
+- Beschreibungs-Entwurf: {{descriptionDraft}}
+
+{{answeredQA}}
+
+Wichtig:
+- Titel in BEIDEN Sprachen max. 60 Zeichen
+- Preis in CHF als realistischer Marktpreis (Zahl ohne Währungszeichen)
+- Versandkosten für die Schweiz einschätzen

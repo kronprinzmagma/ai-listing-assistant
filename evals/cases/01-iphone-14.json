@@ -1,0 +1,31 @@
+{
+  "id": "01-iphone-14",
+  "product": "iPhone 14",
+  "metadata": {
+    "category": "Smartphones",
+    "condition": "wie neu",
+    "priceRangeCHF": [400, 500]
+  },
+  "imagePaths": [
+    "evals/cases/images/01-iphone-14/front.jpg",
+    "evals/cases/images/01-iphone-14/back.jpg"
+  ],
+  "goldListing": {
+    "de": {
+      "title": "Apple iPhone 14 128GB Midnight – wie neu",
+      "description": "iPhone 14 in Topzustand. Keine Kratzer, mit Original-Verpackung. Akku bei 96%. Entsperrt für alle Netze.",
+      "category": "Smartphones",
+      "condition": "wie neu",
+      "price": 450,
+      "shipping": "CH-Post A-Post, ca. 5 CHF"
+    },
+    "fr": {
+      "title": "Apple iPhone 14 128Go Midnight – comme neuf",
+      "description": "iPhone 14 en parfait état. Sans rayures, boîte d'origine. Batterie à 96%. Débloqué tous opérateurs.",
+      "category": "Smartphones",
+      "condition": "comme neuf",
+      "price": 450,
+      "shipping": "Swiss Post A-Post, env. 5 CHF"
+    }
+  }
+}

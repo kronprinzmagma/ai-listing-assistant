@@ -1,0 +1,30 @@
+{
+  "id": "07-lego-technic",
+  "product": "LEGO Technic 42096 Porsche 911 RSR",
+  "metadata": {
+    "category": "Spielzeug",
+    "condition": "akzeptabel",
+    "priceRangeCHF": [60, 100]
+  },
+  "imagePaths": [
+    "evals/cases/images/07-lego-technic/photo1.jpg"
+  ],
+  "goldListing": {
+    "de": {
+      "title": "LEGO Technic 42096 Porsche 911 RSR",
+      "description": "LEGO Technic 42096 Porsche 911 RSR, vollständig. Bauanleitung dabei, Originalkarton mit leichten Schäden. Alle Teile vorhanden, keine Fehler. Mehrfach aufgebaut und abgebaut.",
+      "category": "Spielzeug",
+      "condition": "akzeptabel",
+      "price": 75,
+      "shipping": "CH-Post B-Post, ca. 7 CHF"
+    },
+    "fr": {
+      "title": "LEGO Technic 42096 Porsche 911 RSR",
+      "description": "LEGO Technic 42096 Porsche 911 RSR, complet. Notice incluse, boîte originale légèrement abîmée. Toutes les pièces présentes, aucune manquante. Monté et démonté plusieurs fois.",
+      "category": "Jeux & Jouets",
+      "condition": "état acceptable",
+      "price": 75,
+      "shipping": "La Poste B, env. 7 CHF"
+    }
+  }
+}

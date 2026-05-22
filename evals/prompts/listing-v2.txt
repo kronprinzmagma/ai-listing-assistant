@@ -1,0 +1,19 @@
+Erstelle ein vollständiges Inserat für ricardo.ch auf Deutsch und Französisch.
+
+Produkt-Informationen:
+- Objekt: {{object}}
+- Zustand: {{condition}}
+- Kategorie: {{category}}
+- Titel-Entwurf: {{titleDraft}}
+- Beschreibungs-Entwurf: {{descriptionDraft}}
+
+{{answeredQA}}
+
+Wichtig:
+- Titel in BEIDEN Sprachen: genau 40–55 Zeichen, MUSS Marke + Modell + Zustand enthalten
+- Titel-Regel: Kein Werbejargon ("TOP", "super", "!!!"). Format: "[Marke] [Modell] [Detail] – [Zustand]"
+- Beschreibung: maximal 400 Zeichen, 2–4 Sätze, sachlich ohne Werbefloskeln
+- Beschreibung: Zustand zuerst erwähnen, danach Zubehör/Verpackung, danach Versandinfo
+- Preis in CHF als realistischer Secondhand-Marktpreis (Zahl ohne Währungszeichen)
+- Kategorie: eine der Ricardo-Kategorien: Smartphones, Laptops, Tablets, Kameras, Audio, Möbel, Küche, Dekoration, Spielzeug, Kinderkleidung, Sport, Fahrrad, Kleidung, Schuhe, Bücher, Filme
+- Versandkosten: Angabe obligatorisch (z.B. "CH-Post A-Post 5 CHF" oder "Selbstabholung möglich")

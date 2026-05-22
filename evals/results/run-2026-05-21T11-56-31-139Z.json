@@ -1,0 +1,29 @@
+{
+  "runId": "run-2026-05-21T11-56-31-139Z",
+  "timestamp": "2026-05-21T11-56-31-139Z",
+  "cases": [
+    {
+      "caseId": "01-iphone-14",
+      "titleScore": 1,
+      "titleRationale": "Der Titel stimmt exakt mit der Gold-Referenz überein: Er nennt Marke, Modell, Speichervariante und Farbe präzise, ist mit 40 Zeichen optimal lang, enthält alle relevanten Suchbegriffe und ist vollkommen sachlich formuliert.",
+      "descriptionScore": 0.9,
+      "descriptionRationale": "Alle Aussagen sind durch den Produktkontext und die Gold-Referenz gedeckt (Zustand, Akku, Entsperrung, Verpackung). Die Beschreibung ist jedoch mit ~560 Zeichen am oberen Rand und enthält leicht redundante Formulierungen wie 'kaum benutzt' zusätzlich zu 'Topzustand'.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Smartphones\""
+    },
+    {
+      "caseId": "02-ikea-kallax",
+      "titleScore": 1,
+      "titleRationale": "Der Titel entspricht exakt der Gold-Referenz: Er nennt Marke (IKEA), Modell (Kallax), Variante (4x4), Farbe (weiss) und Zustand (gut erhalten) – alle relevanten Suchbegriffe sind enthalten, der Ton ist sachlich und die Länge liegt mit 42 Zeichen im optimalen Bereich.",
+      "descriptionScore": 1,
+      "descriptionRationale": "Alle Aussagen (Farbe, Grösse, Zustand, Abmessungen, Abholung/Versand) sind durch den Produktkontext und die Gold-Referenz vollständig gedeckt, ohne Halluzinationen. Die Beschreibung deckt alle drei Aspekte (Zustand, Eigenschaften, Versand) ab, ist angemessen knapp und sachlich formuliert.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Möbel\""
+    }
+  ],
+  "aggregates": {
+    "titleAvg": 1,
+    "descriptionAvg": 0.95,
+    "categoryExactMatchRate": 1
+  }
+}

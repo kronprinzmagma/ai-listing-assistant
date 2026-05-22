@@ -1,0 +1,18 @@
+description: "AI Listing Assistant — Phase 2 Eval Framework"
+
+providers:
+  - id: file://evals/providers/listing-provider.ts
+    label: listing-writer-v1
+    config:
+      promptVersion: v1
+
+prompts:
+  - file://evals/prompts/listing-v1.txt
+
+# tests are loaded programmatically in run-eval.ts from loadCases();
+# we keep an empty marker here for promptfoo CLI compatibility.
+tests: []
+
+defaultTest:
+  options:
+    provider: anthropic:messages:claude-sonnet-4-6

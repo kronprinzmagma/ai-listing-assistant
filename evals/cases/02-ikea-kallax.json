@@ -1,0 +1,30 @@
+{
+  "id": "02-ikea-kallax",
+  "product": "IKEA Kallax Regal 4x4",
+  "metadata": {
+    "category": "Möbel",
+    "condition": "gut",
+    "priceRangeCHF": [50, 100]
+  },
+  "imagePaths": [
+    "evals/cases/images/02-ikea-kallax/front.jpg"
+  ],
+  "goldListing": {
+    "de": {
+      "title": "IKEA Kallax 4x4 Regal weiss – gut erhalten",
+      "description": "IKEA Kallax Regal in weiss, 4x4 Fächer. Normaler Gebrauchszustand, keine grösseren Schäden. Selbstabholung in Zürich. Abmessungen: 147x147 cm.",
+      "category": "Möbel",
+      "condition": "gut",
+      "price": 75,
+      "shipping": "Nur Selbstabholung"
+    },
+    "fr": {
+      "title": "Étagère IKEA Kallax 4x4 blanc – bon état",
+      "description": "Étagère IKEA Kallax blanc, 4x4 cases. État d'usage normal, sans dommages majeurs. À retirer à Zurich. Dimensions: 147x147 cm.",
+      "category": "Meubles",
+      "condition": "bon état",
+      "price": 75,
+      "shipping": "À retirer uniquement"
+    }
+  }
+}

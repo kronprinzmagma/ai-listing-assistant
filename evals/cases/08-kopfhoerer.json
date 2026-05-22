@@ -1,0 +1,31 @@
+{
+  "id": "08-kopfhoerer",
+  "product": "Sony WH-1000XM4 Kopfhörer",
+  "metadata": {
+    "category": "Audio",
+    "condition": "wie neu",
+    "priceRangeCHF": [150, 220]
+  },
+  "imagePaths": [
+    "evals/cases/images/08-kopfhoerer/photo1.jpg",
+    "evals/cases/images/08-kopfhoerer/photo2.jpg"
+  ],
+  "goldListing": {
+    "de": {
+      "title": "Sony WH-1000XM4 Kopfhörer – wie neu",
+      "description": "Sony WH-1000XM4 Over-Ear Kopfhörer mit ANC, kaum benutzt. Originalzubehör vorhanden (Kabel, Adapter, Tragetasche). Akkuleistung wie neu. Kein Kratzer. Versand per CH-Post.",
+      "category": "Audio",
+      "condition": "wie neu",
+      "price": 185,
+      "shipping": "CH-Post A-Post, ca. 6 CHF"
+    },
+    "fr": {
+      "title": "Sony WH-1000XM4 casque – comme neuf",
+      "description": "Casque Sony WH-1000XM4 avec ANC, très peu utilisé. Accessoires d'origine inclus (câble, adaptateur, housse). Autonomie batterie comme neuve. Sans rayures. Envoi postal.",
+      "category": "Audio",
+      "condition": "comme neuf",
+      "price": 185,
+      "shipping": "Swiss Post A, env. 6 CHF"
+    }
+  }
+}
