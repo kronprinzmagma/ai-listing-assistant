@@ -41,7 +41,7 @@ flowchart TD
 
 Detailed component descriptions: [docs/architecture.md](docs/architecture.md)
 
-## AI Engineering Concepts Demonstrated
+## Engineering Decisions
 
 | Concept | Where | Why it matters |
 |---------|-------|----------------|
