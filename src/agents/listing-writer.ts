@@ -91,7 +91,9 @@ export async function runListingWriter(
   const generationPrompt = buildGenerationPrompt(analysis, answeredQA, promptOverride)
 
   const genMessage = await generateCall(generationPrompt)
-  let output = genMessage.parsed_output!
+  const genOutput = genMessage.parsed_output
+  if (!genOutput) throw new Error('ListingWriter: generation call returned null structured output (model may have refused or truncated)')
+  let output = genOutput
   let totalInputTokens = genMessage.usage?.input_tokens ?? 0
   let totalOutputTokens = genMessage.usage?.output_tokens ?? 0
 
@@ -99,13 +101,19 @@ export async function runListingWriter(
   const valMessage = await validateCall(output)
   totalInputTokens += valMessage.usage?.input_tokens ?? 0
   totalOutputTokens += valMessage.usage?.output_tokens ?? 0
-  const validation = valMessage.parsed_output!
+  const validation = valMessage.parsed_output
+  if (!validation) throw new Error('ListingWriter: validation call returned null structured output')
 
   if (!validation.titleDeValid || !validation.titleFrValid) {
     const corrMessage = await correctCall(generationPrompt, output, validation.issues)
-    output = corrMessage.parsed_output!
+    const corrected = corrMessage.parsed_output
+    if (!corrected) throw new Error('ListingWriter: correction call returned null structured output')
     totalInputTokens += corrMessage.usage?.input_tokens ?? 0
     totalOutputTokens += corrMessage.usage?.output_tokens ?? 0
+    // Hard-enforce title length in code, not just via LLM validation
+    if (corrected.de.title.length > 60) corrected.de.title = corrected.de.title.slice(0, 60)
+    if (corrected.fr.title.length > 60) corrected.fr.title = corrected.fr.title.slice(0, 60)
+    output = corrected
   }
 
   return {

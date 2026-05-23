@@ -22,6 +22,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ questions: session.questions })
     }
 
+    // Note: concurrent requests to this route within the same session may result in duplicate
+    // AI calls. This is accepted as a known limitation for a single-user tool. For multi-user
+    // deployments, implement advisory file locking around the read-check-write cycle.
     const { output, trace } = await runQuestionGenerator({ analysis: session.analysis })
     session.questions = output
     session.agentTrace = [...(session.agentTrace ?? []), trace]

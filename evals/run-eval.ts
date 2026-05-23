@@ -93,8 +93,33 @@ export async function main(options: MainOptions = {}): Promise<EvalRunResult> {
       })
       continue
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const listing = JSON.parse(callResult.output as string) as any
+    let listingRaw: unknown
+    try {
+      listingRaw = JSON.parse(String(callResult.output))
+    } catch {
+      caseResults.push({
+        caseId: tc.id,
+        titleScore: 0, titleRationale: 'JSON parse failed',
+        descriptionScore: 0, descriptionRationale: 'JSON parse failed',
+        categoryScore: 0, categoryRationale: 'JSON parse failed',
+        error: 'JSON parse failed',
+      })
+      continue
+    }
+
+    const { RicardoListingSchema } = await import('../src/agents/schemas')
+    const parsedListing = RicardoListingSchema.safeParse(listingRaw)
+    if (!parsedListing.success) {
+      caseResults.push({
+        caseId: tc.id,
+        titleScore: 0, titleRationale: 'Invalid listing schema',
+        descriptionScore: 0, descriptionRationale: 'Invalid listing schema',
+        categoryScore: 0, categoryRationale: 'Invalid listing schema',
+        error: 'Invalid listing schema',
+      })
+      continue
+    }
+    const listing = parsedListing.data
     const productContext = `${tc.product}, ${tc.metadata.category}, ${tc.metadata.condition}`
 
     const [titleGrade, descGrade] = await Promise.all([

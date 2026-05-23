@@ -18,6 +18,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ analysis: session.analysis })
     }
 
+    // Note: concurrent requests to this route within the same session may result in duplicate
+    // AI calls. This is accepted as a known limitation for a single-user tool. For multi-user
+    // deployments, implement advisory file locking around the read-check-write cycle.
     const { output, trace } = await runImageAnalyzer({ photoPaths: session.photoPaths })
     session.analysis = output
     session.agentTrace = [...(session.agentTrace ?? []), trace]

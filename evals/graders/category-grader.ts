@@ -6,6 +6,10 @@ export interface CategoryGradeResult {
   suggestion: string
 }
 
+// CATEGORY_HIERARCHY maps subcategories to their parent.
+// Top-level categories (roots) are not listed here — they have no parent.
+// All keys in CATEGORY_ID_MAP (src/lib/category-map.ts) must be reachable
+// either as a key in this map or as a parent value in this map.
 export const CATEGORY_HIERARCHY: Record<string, string> = {
   'Smartphones': 'Elektronik',
   'Laptops': 'Elektronik',
@@ -19,6 +23,7 @@ export const CATEGORY_HIERARCHY: Record<string, string> = {
   'Kinderkleidung': 'Kinder & Familie',
   'Sport': 'Sport & Outdoor',
   'Fahrrad': 'Sport & Outdoor',
+  'Fahrräder': 'Sport & Outdoor',
   'Kleidung': 'Mode',
   'Schuhe': 'Mode',
   'Bücher': 'Medien',

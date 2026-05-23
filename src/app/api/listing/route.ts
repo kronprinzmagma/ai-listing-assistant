@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateSessionId, readSession, writeSession } from '@/lib/session'
-import { Listing } from '@/types/session'
+import { RicardoListingSchema } from '@/agents/schemas'
 
 export async function PATCH(req: NextRequest) {
-  const { sessionId, listing, approved } = (await req.json()) as {
+  const body = (await req.json()) as {
     sessionId: string
-    listing?: Listing
+    listing?: unknown
     approved?: boolean
   }
+  const { sessionId, listing, approved } = body
 
   try {
     validateSessionId(sessionId)
@@ -17,8 +18,15 @@ export async function PATCH(req: NextRequest) {
 
   try {
     const session = await readSession(sessionId)
-    if (listing) session.listing = listing
-    if (approved !== undefined) session.approved = approved
+    if (listing !== undefined) {
+      const parsed = RicardoListingSchema.safeParse(listing)
+      if (!parsed.success) {
+        return NextResponse.json({ error: 'Invalid listing format' }, { status: 400 })
+      }
+      session.listing = parsed.data
+    }
+    // Only allow setting approved to true, never downgrade from true to false
+    if (approved === true) session.approved = true
     await writeSession(session)
     return NextResponse.json({ ok: true })
   } catch (err) {

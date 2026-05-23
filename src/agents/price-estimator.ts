@@ -36,7 +36,8 @@ Gib zurück:
     output_config: { format: zodOutputFormat(PriceEstimateSchema) },
   })
 
-  const output = message.parsed_output!
+  const output = message.parsed_output
+  if (!output) throw new Error('PriceEstimator: structured output was null (model may have refused or truncated)')
 
   return {
     output,

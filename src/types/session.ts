@@ -14,19 +14,10 @@ export interface Question {
   answer?: string
 }
 
-export interface ListingLocale {
-  title: string
-  description: string
-  category: string
-  condition: string
-  price: number
-  shipping: string
-}
-
-export interface Listing {
-  de: ListingLocale
-  fr: ListingLocale
-}
+// ListingLocale and Listing are structurally unified with the Zod schemas in @/agents/schemas.
+// Re-exporting from schemas ensures both type systems stay in sync and eliminates unsafe `as Listing` casts.
+import type { RicardoListing as Listing, ListingLocaleZ as ListingLocale } from '@/agents/schemas'
+export type { Listing, ListingLocale }
 
 export interface AgentTraceEntry {
   agent: 'ImageAnalyzer' | 'QuestionGenerator' | 'ListingWriter' | 'PriceEstimator' | 'RicardoPublisher'

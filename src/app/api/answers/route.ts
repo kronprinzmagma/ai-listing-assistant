@@ -3,16 +3,19 @@ import { validateSessionId, readSession, writeSession } from '@/lib/session'
 import { sanitizeUserAnswer } from '@/lib/sanitize'
 
 export async function POST(req: NextRequest) {
-  const { sessionId, answers } = (await req.json()) as {
-    sessionId: string
-    answers: Record<string, string>
-  }
+  const body = (await req.json()) as { sessionId: string; answers: unknown }
+  const { sessionId, answers } = body
 
   try {
     validateSessionId(sessionId)
   } catch {
     return NextResponse.json({ error: 'Invalid sessionId' }, { status: 400 })
   }
+
+  if (!answers || typeof answers !== 'object' || Array.isArray(answers)) {
+    return NextResponse.json({ error: 'Ungültige Antworten' }, { status: 400 })
+  }
+  const answersMap = answers as Record<string, unknown>
 
   try {
     const session = await readSession(sessionId)
@@ -22,8 +25,8 @@ export async function POST(req: NextRequest) {
     session.questions = session.questions.map((q) => ({
       ...q,
       answer:
-        answers[q.id] !== undefined
-          ? sanitizeUserAnswer(answers[q.id])
+        answersMap[q.id] !== undefined
+          ? sanitizeUserAnswer(String(answersMap[q.id]).slice(0, 1000))
           : q.answer,
     }))
     await writeSession(session)

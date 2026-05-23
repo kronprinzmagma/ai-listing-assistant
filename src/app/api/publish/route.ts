@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     // Tokens are stored in-process only and NEVER written to session JSON
     let tokenRecord = TokenStore.get(sessionId)
     if (!tokenRecord) {
-      tokenRecord = { partnershipKey: PARTNERSHIP_KEY, acquiredAt: Date.now() }
+      tokenRecord = { partnershipKey: PARTNERSHIP_KEY, acquiredAt: Date.now(), expiresAt: Date.now() + 24 * 60 * 60 * 1000 }
       TokenStore.set(sessionId, tokenRecord)
     }
 

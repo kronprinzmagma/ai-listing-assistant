@@ -14,10 +14,17 @@ export async function POST(req: NextRequest) {
   const session = await createSession()
   const uploadDir = await getUploadDir(session.id)
 
+  const ALLOWED_EXTS = new Set(['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'])
+  const ALLOWED_MIMES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'])
+
   const photoPaths: string[] = []
   for (let i = 0; i < files.length; i++) {
     const file = files[i]
-    const ext = file.name.split('.').pop() || 'jpg'
+    if (!ALLOWED_MIMES.has(file.type)) {
+      return NextResponse.json({ error: 'Ungültiger Dateityp. Erlaubt: JPG, PNG, WebP, HEIC.' }, { status: 400 })
+    }
+    const rawExt = (file.name.split('.').pop() ?? 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
+    const ext = ALLOWED_EXTS.has(rawExt) ? rawExt : 'jpg'
     const filePath = path.join(uploadDir, `photo-${i}.${ext}`)
     const buffer = Buffer.from(await file.arrayBuffer())
     await fs.promises.writeFile(filePath, buffer)

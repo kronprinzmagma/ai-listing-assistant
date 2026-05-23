@@ -57,7 +57,8 @@ export async function runImageAnalyzer(
     output_config: { format: zodOutputFormat(AnalysisResultSchema) },
   })
 
-  const output = message.parsed_output!
+  const output = message.parsed_output
+  if (!output) throw new Error('ImageAnalyzer: structured output was null (model may have refused or truncated)')
 
   return {
     output,

@@ -132,11 +132,12 @@ export default function ReviewPage() {
   const handleSave = async () => {
     if (!listing) return
     setSaving(true)
-    await fetch('/api/listing', {
+    const res = await fetch('/api/listing', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId, listing }),
     })
+    if (!res.ok) setError('Fehler beim Speichern.')
     setSaving(false)
   }
 

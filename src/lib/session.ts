@@ -47,8 +47,11 @@ export async function readSession(id: string): Promise<SessionState> {
   try {
     const content = await fs.promises.readFile(filePath, 'utf-8')
     return JSON.parse(content) as SessionState
-  } catch {
-    throw new Error(`Session ${id} not found`)
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new Error(`Session ${id} not found`)
+    }
+    throw new Error(`Session ${id} is corrupted: ${(err as Error).message}`)
   }
 }
 

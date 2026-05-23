@@ -33,8 +33,9 @@ Stelle 3-5 kurze Rückfragen auf Deutsch, um fehlende Informationen zu ergänzen
     output_config: { format: zodOutputFormat(QuestionsOutputSchema) },
   })
 
-  const questionTexts = message.parsed_output!.questions
-  const output: Question[] = questionTexts.slice(0, 5).map((text) => ({ id: uuidv4(), text }))
+  const parsed = message.parsed_output
+  if (!parsed) throw new Error('QuestionGenerator: structured output was null (model may have refused or truncated)')
+  const output: Question[] = parsed.questions.map((text) => ({ id: uuidv4(), text }))
 
   return {
     output,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function UploadPage() {
@@ -12,13 +12,23 @@ export default function UploadPage() {
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
+  // Revoke object URLs when component unmounts to prevent memory leak
+  useEffect(() => {
+    return () => {
+      previews.forEach((url) => URL.revokeObjectURL(url))
+    }
+  }, [previews])
+
   const addFiles = useCallback((newFiles: FileList | null) => {
     if (!newFiles) return
     const arr = Array.from(newFiles)
     const combined = [...files, ...arr].slice(0, 5)
     setFiles(combined)
-    const urls = combined.map((f) => URL.createObjectURL(f))
-    setPreviews(urls)
+    // Revoke old previews before creating new ones to prevent memory leak
+    setPreviews((prev) => {
+      prev.forEach((url) => URL.revokeObjectURL(url))
+      return combined.map((f) => URL.createObjectURL(f))
+    })
   }, [files])
 
   const handleDrop = (e: React.DragEvent) => {

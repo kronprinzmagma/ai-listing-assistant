@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateSessionId, readSession, writeSession } from '@/lib/session'
 import { runListingWriter } from '@/agents/listing-writer'
 import { runPriceEstimator } from '@/agents/price-estimator'
-import type { Listing } from '@/types/session'
 
 export async function POST(req: NextRequest) {
   const { sessionId } = (await req.json()) as { sessionId: string }
@@ -20,6 +19,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Analyse fehlt' }, { status: 400 })
     }
 
+    // Note: concurrent requests to this route within the same session may result in duplicate
+    // AI calls. This is accepted as a known limitation for a single-user tool. For multi-user
+    // deployments, implement advisory file locking around the read-check-write cycle.
+
     // Idempotency: skip ONLY if BOTH outputs exist (per Pitfall #4)
     if (session.listing && session.priceEstimate) {
       return NextResponse.json({
@@ -34,7 +37,7 @@ export async function POST(req: NextRequest) {
       runPriceEstimator({ analysis: session.analysis }),
     ])
 
-    session.listing = listingResult.output as Listing
+    session.listing = listingResult.output
     session.priceEstimate = priceResult.output
     session.agentTrace = [
       ...(session.agentTrace ?? []),

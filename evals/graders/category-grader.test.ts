@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { gradeCategory, CATEGORY_HIERARCHY } from './category-grader'
+import { CATEGORY_ID_MAP } from '../../src/lib/category-map'
 
 describe('gradeCategory', () => {
   it('Test 1: exact match returns score 1.0 with exactMatch=true', () => {
@@ -59,6 +60,20 @@ describe('gradeCategory', () => {
 
     const noMatchResult = gradeCategory('Smartphones', 'Bücher')
     expect(noMatchResult.suggestion).toContain('Bücher')
+  })
+})
+
+describe('IN-01: CATEGORY_ID_MAP keys are reachable in CATEGORY_HIERARCHY', () => {
+  it('every key in CATEGORY_ID_MAP appears as a key or parent value in CATEGORY_HIERARCHY', () => {
+    const hierarchyKeys = new Set(Object.keys(CATEGORY_HIERARCHY))
+    const hierarchyParents = new Set(Object.values(CATEGORY_HIERARCHY))
+    const missing: string[] = []
+    for (const category of Object.keys(CATEGORY_ID_MAP)) {
+      if (!hierarchyKeys.has(category) && !hierarchyParents.has(category)) {
+        missing.push(category)
+      }
+    }
+    expect(missing).toEqual([])
   })
 })
 

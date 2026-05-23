@@ -1,8 +1,11 @@
+import path from 'path'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { UploadImageInputSchema } from '../schemas/tool-inputs.js'
 import { UploadImageOutputSchema } from '../schemas/tool-outputs.js'
 import { makeTypedError } from '../schemas/errors.js'
 import { RicardoClient } from '../client.js'
+
+const ALLOWED_UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR ?? './uploads')
 
 export function registerUploadImage(server: McpServer, client: RicardoClient): void {
   server.registerTool(
@@ -14,6 +17,10 @@ export function registerUploadImage(server: McpServer, client: RicardoClient): v
       outputSchema: UploadImageOutputSchema,
     },
     async ({ listingId, imagePath }) => {
+      const resolved = path.resolve(imagePath)
+      if (!resolved.startsWith(ALLOWED_UPLOAD_DIR + path.sep)) {
+        throw new Error('imagePath outside allowed upload directory')
+      }
       try {
         const result = await client.uploadImage({ listingId, imagePath })
         return {
