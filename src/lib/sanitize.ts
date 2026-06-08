@@ -7,11 +7,11 @@ export function sanitizeUserAnswer(raw: string): string {
   const truncated = raw.slice(0, MAX_ANSWER_LENGTH)
   const clean = truncated.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
   return clean
-    .replace(/\bIgnore (previous|above|all) instructions?\b/gi, '[blocked]')
-    .replace(/\bIGNORE ALL\b/gi, '[blocked]')
-    .replace(/\bDu bist jetzt\b/gi, '[blocked]')
-    .replace(/\bVergiss alle Anweisungen\b/gi, '[blocked]')
-    .replace(/\bOublie (les instructions|toutes les instructions)\b/gi, '[blocked]')
-    .replace(/\bsystem prompt\b/gi, '[blocked]')
-    .replace(/\bForget everything\b/gi, '[blocked]')
+    .replace(/\bIgnore\s+(previous|above|all)\s+instructions?\b/gi, '[blocked]')
+    .replace(/\bIGNORE\s+ALL\b/gi, '[blocked]')
+    .replace(/\bDu\s+bist\s+jetzt\b/gi, '[blocked]')
+    .replace(/\bVergiss\s+alle\s+Anweisungen\b/gi, '[blocked]')
+    .replace(/\bOublie\s+(les\s+instructions|toutes\s+les\s+instructions)\b/gi, '[blocked]')
+    .replace(/\bsystem\s+prompt\b/gi, '[blocked]')
+    .replace(/\bForget\s+everything\b/gi, '[blocked]')
 }

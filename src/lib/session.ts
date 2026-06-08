@@ -43,6 +43,7 @@ export async function createSession(): Promise<SessionState> {
 }
 
 export async function readSession(id: string): Promise<SessionState> {
+  validateSessionId(id)
   const filePath = path.join(sessionsDir(), `${id}.json`)
   try {
     const content = await fs.promises.readFile(filePath, 'utf-8')
@@ -64,6 +65,7 @@ export async function writeSession(session: SessionState): Promise<void> {
 }
 
 export async function getUploadDir(sessionId: string): Promise<string> {
+  validateSessionId(sessionId)
   const dir = path.join(uploadsDir(), sessionId)
   await fs.promises.mkdir(dir, { recursive: true })
   return dir

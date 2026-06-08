@@ -72,9 +72,14 @@ src/
   lib/
     session.ts                        # createSession / readSession / writeSession
     anthropic.ts                      # Anthropic-Client
-    analyze.ts                        # Bildanalyse-Prompt
-    questions.ts                      # Rückfragen-Prompt
-    generate.ts                       # Inserat-Generierung (DE + FR)
+    sanitize.ts                       # Eingabe-Bereinigung gegen Prompt-Injection
+  agents/                             # Fünf typisierte, zustandslose Agents (input → { output, trace })
+    image-analyzer.ts                 # ImageAnalyzer: Fotos → AnalysisResult
+    question-generator.ts             # QuestionGenerator: Analyse → Rückfragen
+    listing-writer.ts                 # ListingWriter: Analyse + Antworten → Inserat (DE + FR)
+    price-estimator.ts                # PriceEstimator: Analyse → Preisschätzung (CHF)
+    ricardo-publisher.ts              # RicardoPublisher: Inserat → Ricardo.ch via MCP
+    schemas.ts                        # Zod-Schemas für alle Agent-Ein- und -Ausgaben
   types/
     session.ts                        # SessionState, AnalysisResult, Listing, ...
 uploads/                              # gitignored, runtime
@@ -145,9 +150,9 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - ESLint 9.x with `eslint-config-next` 16.2.1 - Linting (config: `eslint.config.mjs`)
 - TypeScript compiler via `tsconfig.json` (`noEmit: true`, bundler module resolution)
 ## Key Dependencies
-- `@anthropic-ai/sdk` ^0.80.0 - Claude AI client for image analysis and text generation (`src/lib/anthropic.ts`)
-- `sharp` ^0.34.5 - Server-side image resizing before API calls (`src/lib/analyze.ts`)
-- `uuid` ^13.0.0 - Session ID and question ID generation (`src/lib/session.ts`, `src/lib/questions.ts`)
+- `@anthropic-ai/sdk` ^0.97.1 - Claude AI client for image analysis and text generation (`src/lib/anthropic.ts`)
+- `sharp` ^0.34.5 - Server-side image resizing before API calls (`src/agents/image-analyzer.ts`)
+- `uuid` ^13.0.0 - Session ID and question ID generation (`src/lib/session.ts`, `src/agents/question-generator.ts`)
 - Node.js built-in `fs` and `path` - Local file storage for sessions and uploads (`src/lib/session.ts`)
 ## Configuration
 - `.env.local` - Required for local development (present but not read)
@@ -170,9 +175,9 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 ## Naming Patterns
 - Page components: `page.tsx` (Next.js App Router convention)
 - API routes: `route.ts` (Next.js App Router convention)
-- Library modules: camelCase (`session.ts`, `analyze.ts`, `generate.ts`, `questions.ts`, `anthropic.ts`)
+- Library modules: camelCase (`session.ts`, `sanitize.ts`, `anthropic.ts`); Agent-Module unter `src/agents/` als kebab-case (`image-analyzer.ts`, `listing-writer.ts`)
 - Type definitions: `session.ts` under `src/types/`
-- Async functions: camelCase verbs (`analyzePhotos`, `generateListing`, `generateQuestions`, `createSession`, `readSession`, `writeSession`, `getUploadDir`)
+- Async functions: camelCase verbs (`runImageAnalyzer`, `runListingWriter`, `runQuestionGenerator`, `runPriceEstimator`, `runRicardoPublisher`, `createSession`, `readSession`, `writeSession`, `getUploadDir`)
 - React components: PascalCase (`UploadPage`, `ReviewPage`, `QuestionsPage`, `ListingForm`)
 - Event handlers: `handle` prefix (`handleSubmit`, `handleApprove`, `handleSave`, `handleChange`, `handleDrop`)
 - camelCase throughout (`sessionId`, `photoPaths`, `uploadDir`, `answeredQA`, `jsonMatch`)
@@ -209,7 +214,7 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - No console.log statements observed in production code
 - Errors surface to the browser via React state (`setError`) or propagate as thrown exceptions
 ## Comments
-- Single inline comment observed: `// Enforce 60-char limit` in `src/lib/generate.ts` (line 64)
+- Inline-Kommentare sparsam, vorwiegend in den Agent-Modulen unter `src/agents/`
 - No JSDoc/TSDoc annotations anywhere
 - Comment style: English for code-level notes, German for prompts and UI text
 - Not used
@@ -218,7 +223,7 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - API routes return `NextResponse.json(...)` directly
 - Void functions typed with `: void` return annotation (`writeSession`, `ensureDirs`)
 ## Module Design
-- Named exports for lib utilities (`export function createSession`, `export async function analyzePhotos`)
+- Named exports for lib utilities and agents (`export function createSession`, `export async function runImageAnalyzer`)
 - Default exports for React page components (`export default function UploadPage`)
 - Single named export for the Anthropic client (`export const anthropic`)
 - Not used — all imports reference specific module paths directly
@@ -252,16 +257,19 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 | ListingPage | Trigger listing generation on mount, navigate to review | `src/app/session/[sessionId]/listing/page.tsx` |
 | ReviewPage | Load listing via GET, render editable form, PATCH on save/approve | `src/app/session/[sessionId]/review/page.tsx` |
 | upload route | Create session, write files to disk, return sessionId | `src/app/api/upload/route.ts` |
-| analyze route | Read session, call analyzePhotos(), persist result | `src/app/api/analyze/route.ts` |
-| questions route | Read session.analysis, call generateQuestions(), persist | `src/app/api/questions/route.ts` |
+| analyze route | Read session, call runImageAnalyzer(), persist result | `src/app/api/analyze/route.ts` |
+| questions route | Read session.analysis, call runQuestionGenerator(), persist | `src/app/api/questions/route.ts` |
 | answers route | Merge answers into session.questions, persist | `src/app/api/answers/route.ts` |
-| generate route | Read session, call generateListing(), persist | `src/app/api/generate/route.ts` |
+| generate route | Read session, call runListingWriter() + runPriceEstimator() in parallel, persist | `src/app/api/generate/route.ts` |
+| publish route | Read session, call runRicardoPublisher() to push the listing live via MCP | `src/app/api/publish/route.ts` |
 | listing route | GET returns full session; PATCH updates listing and/or approved flag | `src/app/api/listing/route.ts` |
 | session lib | createSession / readSession / writeSession / getUploadDir | `src/lib/session.ts` |
 | anthropic lib | Singleton Anthropic client configured from env | `src/lib/anthropic.ts` |
-| analyze lib | Resize photos with sharp, send to Claude, parse AnalysisResult JSON | `src/lib/analyze.ts` |
-| questions lib | Send AnalysisResult to Claude, parse Question[] JSON | `src/lib/questions.ts` |
-| generate lib | Send AnalysisResult + answered questions to Claude, parse Listing JSON | `src/lib/generate.ts` |
+| ImageAnalyzer agent | Resize photos with sharp, send to Claude, parse AnalysisResult | `src/agents/image-analyzer.ts` |
+| QuestionGenerator agent | Send AnalysisResult to Claude, parse Question[] | `src/agents/question-generator.ts` |
+| ListingWriter agent | Send AnalysisResult + answered questions to Claude, parse RicardoListing (DE + FR) | `src/agents/listing-writer.ts` |
+| PriceEstimator agent | Send AnalysisResult to Claude, parse PriceEstimate (CHF) | `src/agents/price-estimator.ts` |
+| RicardoPublisher agent | Push approved listing to Ricardo.ch via the MCP integration | `src/agents/ricardo-publisher.ts` |
 | SessionState | Authoritative session shape, all step outputs nested inside | `src/types/session.ts` |
 ## Pattern Overview
 - Session state is the single source of truth: `sessions/{uuid}.json` accumulates all step outputs
@@ -281,7 +289,7 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - Depends on: `src/lib/session.ts`, lib domain functions
 - Used by: UI layer via fetch
 - Purpose: Business logic — AI prompt building, image processing, response parsing
-- Location: `src/lib/analyze.ts`, `src/lib/questions.ts`, `src/lib/generate.ts`
+- Location: `src/agents/image-analyzer.ts`, `src/agents/question-generator.ts`, `src/agents/listing-writer.ts`, `src/agents/price-estimator.ts`, `src/agents/ricardo-publisher.ts`
 - Contains: Async functions returning typed results
 - Depends on: `src/lib/anthropic.ts`, `src/types/session.ts`, `sharp`
 - Used by: API routes
@@ -312,7 +320,7 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - Examples: `src/types/session.ts` (definition), `src/lib/session.ts` (persistence)
 - Pattern: Passed by ID through URL; read/write by each API route
 - Purpose: Encapsulate all Claude API calls, prompt strings, and JSON parsing
-- Examples: `src/lib/analyze.ts`, `src/lib/questions.ts`, `src/lib/generate.ts`
+- Examples: `src/agents/image-analyzer.ts`, `src/agents/question-generator.ts`, `src/agents/listing-writer.ts`
 - Pattern: Each function takes typed inputs, calls `anthropic.messages.create`, parses JSON from response text with regex `match(/\{[\s\S]*\}/)` or `match(/\[[\s\S]*\]/)`, returns typed output
 ## Entry Points
 - Location: `src/app/page.tsx`

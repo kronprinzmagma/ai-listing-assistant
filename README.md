@@ -23,7 +23,7 @@ flowchart TD
     RicardoPublisher --> RicardoCh[Ricardo.ch\nListing live]
 
     subgraph MCPPackage["MCP Package (packages/ricardo-mcp)"]
-        MCPServer[MCP Server\nlist / create / update / orders tools]
+        MCPServer[MCP Server\ncreate_listing / update_listing / delete_listing / upload_image / update_order_status]
     end
 
     subgraph EvalFramework["Eval Framework (evals/)"]
