@@ -7,10 +7,10 @@ export function registerDraftListingPrompt(server: McpServer): void {
     {
       title: 'Draft Ricardo Listing',
       description: 'Generate a complete Ricardo.ch listing (DE + FR) from basic product info',
-      argsSchema: z.object({
+      argsSchema: {
         product_name: z.string().min(1).describe('Product name or short description'),
         condition: z.enum(['neu', 'wie neu', 'gut', 'akzeptabel']).describe('Item condition'),
-      }),
+      },
     },
     ({ product_name, condition }) => ({
       messages: [{

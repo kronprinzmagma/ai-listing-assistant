@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Build-Artefakte der Sub-Packages: von tsup generiert (das CJS-Bundle
+    // nutzt require()) und per .gitignore ausgeschlossen — nicht zu linten.
+    "packages/*/dist/**",
   ]),
 ]);
 

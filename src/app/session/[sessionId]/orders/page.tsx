@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import type { RicardoOrder } from '../../../../packages/ricardo-mcp/src/schemas/ricardo'
+import type { RicardoOrder } from '../../../../../packages/ricardo-mcp/src/schemas/ricardo'
 
 export default function OrdersPage() {
   const { sessionId } = useParams<{ sessionId: string }>()

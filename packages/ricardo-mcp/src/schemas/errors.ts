@@ -27,9 +27,13 @@ function classifyError(error: unknown): TypedError['code'] {
   return 'API_UNAVAILABLE'
 }
 
+// Muss strukturell zum CallToolResult des MCP-SDK passen: das SDK erwartet
+// eine Index-Signatur auf dem Result-Objekt und ein indizierbares
+// structuredContent. Ohne beides schlaegt registerTool() im Type-Check fehl.
 export interface CallToolResult {
+  [key: string]: unknown
   content: Array<{ type: 'text'; text: string }>
-  structuredContent: unknown
+  structuredContent: { [key: string]: unknown }
   isError?: boolean
 }
 
