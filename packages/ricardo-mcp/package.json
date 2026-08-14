@@ -18,7 +18,10 @@
       "types": "./dist/client.d.ts"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "prepublishOnly": "npm run build",
@@ -38,7 +41,16 @@
   "publishConfig": {
     "access": "public"
   },
-  "keywords": ["mcp", "ricardo", "claude", "ai", "listing"],
+  "keywords": [
+    "mcp",
+    "ricardo",
+    "claude",
+    "ai",
+    "listing"
+  ],
   "author": "nilsseiter",
-  "license": "MIT"
+  "license": "MIT",
+  "overrides": {
+    "esbuild": "^0.28.1"
+  }
 }
