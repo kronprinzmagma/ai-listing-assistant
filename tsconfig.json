@@ -30,5 +30,14 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  // packages/* ist ein eigenstaendiges Sub-Package mit eigenem tsconfig
+  // (Node16-Aufloesung), eigenem node_modules und eigenem tsup-Build. Die
+  // Next-App darf es nicht mit-typechecken: in CI schlug der Build an
+  // packages/ricardo-mcp/tsup.config.ts fehl ("Cannot find module 'tsup'"),
+  // weil dessen Abhaengigkeiten im App-Job gar nicht installiert sind.
+  // Lokal blieb das unsichtbar, weil node_modules dort vorlag.
+  // Die vom App-Code IMPORTIERTEN Dateien (schemas/ricardo, client) werden
+  // weiterhin geprueft — exclude wirkt nur auf die Wurzel-Dateimenge, nicht
+  // auf den Import-Graphen. Getestet: packages/ricardo-mcp hat eigene CI.
+  "exclude": ["node_modules", "packages"]
 }
