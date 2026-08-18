@@ -4,6 +4,16 @@
     "module": "Node16",
     "moduleResolution": "Node16",
     "lib": ["ES2022"],
+    // TypeScript 6 zieht @types/node nicht mehr automatisch ein, wenn
+    // moduleResolution Node16 ist — ohne diese Zeile fehlen process/console
+    // (17 Fehler beim Upgrade 5.9 -> 6.0, 2026-08-18).
+    "types": ["node"],
+    // Bruecke, kein Dauerzustand: tsup 8.5.1 setzt im DTS-Schritt intern
+    // baseUrl, was TypeScript 6 als Fehler wertet (TS5101) — der Build brach
+    // mit Exit 1 ab. tsup 8.5.1 ist bereits die neueste Version, ein Upgrade
+    // loest es also nicht. Entfernen, sobald tsup baseUrl nicht mehr setzt;
+    // spaetestens vor TypeScript 7, wo baseUrl ganz wegfaellt.
+    "ignoreDeprecations": "6.0",
     "strict": true,
     "outDir": "dist",
     "rootDir": "src",
