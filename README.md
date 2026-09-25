@@ -1,12 +1,26 @@
 # AI Listing Assistant — Verkaufshilfe via Foto
 
+![Status](https://img.shields.io/badge/status-production--grade-2ea44f?style=flat)
+![Tests](https://img.shields.io/badge/tests-Vitest-informational?style=flat)
+![License](https://img.shields.io/badge/license-MIT-lightgrey?style=flat)
+
 **Photo → complete Ricardo.ch listing, bilingual DE/FR, in under 2 minutes — powered by an orchestrated AI agent pipeline.**
+
+<!-- HERO-VISUAL — bitte hier ein Bild einfügen (stärkster visueller Hebel):
+     Screenshot-Strecke der 5-Phasen-Wizard-UI (Upload → Analyse → Rückfragen
+     → Inserat → Review), idealerweise als eine zusammengesetzte Grafik oder
+     ein kurzes GIF eines echten Durchlaufs.
+     1. Bild ablegen unter  docs/wizard-walkthrough.png  und den Pfad in die
+        Sync-Allowlist in .github/workflows/push-to-public.yml aufnehmen.
+     2. Folgende Zeile einkommentieren:
+![5-Phasen-Wizard von Foto zu Inserat](docs/wizard-walkthrough.png)
+-->
 
 ## What This Is
 
 Upload 1–5 photos of any item you want to sell. The assistant runs an agentic pipeline: image analysis extracts object, condition, and category; a question generator asks only what the photos cannot answer; a listing writer produces a complete, bilingual (DE/FR) Ricardo.ch listing with title, description, price estimate, and shipping conditions; a publisher pushes it live via the Ricardo.ch MCP integration. The result is a publication-ready listing with zero manual copywriting.
 
-This project is also a portfolio demonstration of applied AI engineering. It implements an agentic workflow with typed agent contracts (Zod), self-healing retry logic, LLM-as-judge evaluation with A/B prompt testing, full agent observability via `agentTrace`, and a published MCP server package. Each concept maps to inspectable source code.
+This project is also a portfolio demonstration of applied AI engineering. It implements an agentic workflow with typed agent contracts (Zod), self-healing retry logic, LLM-as-judge evaluation with A/B prompt testing, full agent observability via `agentTrace`, and a standalone, publish-ready MCP server package. Each concept maps to inspectable source code.
 
 ## Architecture
 
@@ -51,7 +65,7 @@ Detailed component descriptions: [docs/architecture.md](docs/architecture.md)
 | Observability (agentTrace) | `src/types/session.ts` | Every agent call appends a structured `AgentTraceEntry` (model, tokens, duration, input/output) to `SessionState.agentTrace` — full pipeline replay from a single JSON file |
 | LLM-as-judge evals | `evals/graders/` | Title, description, and category graders use Claude to score outputs against multi-criterion rubrics — deterministic + probabilistic scores combined |
 | Prompt A/B testing | `evals/promptfooconfig.yaml` | Three prompt versions run against 10 fixed test cases; results committed including failures (EVAL-07) — progression tracked in `evals/results/progression.md` |
-| MCP server | `packages/ricardo-mcp/` | Published npm package exposing Ricardo.ch API as MCP tools — RicardoPublisher agent calls it at runtime; any MCP-compatible client can use it independently |
+| MCP server | `packages/ricardo-mcp/` | Standalone npm package exposing Ricardo.ch API as MCP tools — RicardoPublisher agent calls it at runtime; publish-ready (`npm publish`), any MCP-compatible client could use it independently once published |
 | Defense-in-depth security | `src/lib/sanitize.ts`, `src/lib/session.ts`, `.husky/pre-commit` | Session ID validated against path traversal; user answers sanitized against prompt injection; secretlint pre-commit hook blocks credential leaks |
 
 ## Setup
@@ -97,7 +111,7 @@ src/
   lib/             # Business logic: session persistence, sanitize, anthropic client
   types/           # SessionState, AnalysisResult, Listing, AgentTraceEntry, ...
 packages/
-  ricardo-mcp/     # Published MCP server package for Ricardo.ch API integration
+  ricardo-mcp/     # Standalone, publish-ready MCP server package for Ricardo.ch API integration
 evals/
   cases/           # 10 test cases with photos, gold-standard listings, user answers
   graders/         # LLM-as-judge graders: title, description, category

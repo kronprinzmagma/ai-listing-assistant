@@ -18,7 +18,7 @@ copy of this private repo to the public portfolio repo on every push to `main`.
 | Path | Why it is public |
 |------|------------------|
 | `src/` | Application source — no secrets by audit (REPO-05) |
-| `packages/` | Published @nilsseiter/ricardo-mcp portfolio artifact |
+| `packages/` | @nilsseiter/ricardo-mcp portfolio artifact — standalone, publish-ready |
 | `evals/` | Eval framework + results — portfolio piece |
 | `docs/` | Architecture diagrams and eval reports |
 | `public/` | Next.js static assets |
@@ -26,6 +26,7 @@ copy of this private repo to the public portfolio repo on every push to `main`.
 | `package.json`, `package-lock.json`, `tsconfig.json`, `next.config.ts`, `vitest.config.ts`, `eslint.config.mjs` | Build/test config |
 | `.secretlintrc.json`, `.gitignore`, `.env.example` | Public-safe config |
 | `README.md`, `AGENTS.md`, `CLAUDE.md` | Public-facing docs |
+| `LICENSE` | MIT license text, matches the `License` badge |
 
 ## Excluded by default (allowlist model)
 
