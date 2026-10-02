@@ -48,7 +48,7 @@
     "vitest": "^4.1.10"
   },
   "overrides": {
-    "undici": "^7.29.0",
+    "undici": "^7.30.0",
     "sharp": "^0.35.4",
     "adm-zip": "^0.6.1"
   }
