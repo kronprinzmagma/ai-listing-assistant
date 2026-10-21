@@ -4,7 +4,7 @@
 ![Tests](https://img.shields.io/badge/tests-Vitest-informational?style=flat)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey?style=flat)
 
-**Photo → complete Ricardo.ch listing, bilingual DE/FR, in under 2 minutes — powered by an orchestrated AI agent pipeline.**
+**Photo → complete Ricardo.ch listing, bilingual DE/FR, with one review step before anything goes live — powered by a five-agent AI pipeline.**
 
 <!-- HERO-VISUAL — bitte hier ein Bild einfügen (stärkster visueller Hebel):
      Screenshot-Strecke der 5-Phasen-Wizard-UI (Upload → Analyse → Rückfragen
@@ -20,7 +20,7 @@
 
 Upload 1–5 photos of any item you want to sell. The assistant runs an agentic pipeline: image analysis extracts object, condition, and category; a question generator asks only what the photos cannot answer; a listing writer produces a complete, bilingual (DE/FR) Ricardo.ch listing with title, description, price estimate, and shipping conditions; a publisher pushes it live via the Ricardo.ch MCP integration. The result is a publication-ready listing with zero manual copywriting.
 
-This project is also a portfolio demonstration of applied AI engineering. It implements an agentic workflow with typed agent contracts (Zod), self-healing retry logic, LLM-as-judge evaluation with A/B prompt testing, full agent observability via `agentTrace`, and a standalone, publish-ready MCP server package. Each concept maps to inspectable source code.
+Built as an applied AI engineering case: typed agent contracts (Zod), a self-healing ListingWriter, LLM-as-judge evals with prompt A/B testing, and per-agent tracing via `agentTrace`. It also ships a standalone, publish-ready MCP server package. Each concept maps to inspectable source code.
 
 ## Architecture
 
