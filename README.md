@@ -8,9 +8,9 @@
 
 > **Status:** The pipeline from photo to reviewed listing works end to end. Publishing runs against a stub Ricardo.ch client until partner API access is granted; the MCP server package wraps the same client.
 
-![The five wizard steps from photo to reviewed listing](docs/wizard-walkthrough.png)
+![Two staged captures of the actual listing review component: editable German and French listings for a fictional desk lamp, before approval](docs/review-de-fr.png)
 
-*Screenshots of the running app with a synthetic example (a drawn moka pot, invented answers). The agent outputs were pre-filled for the screenshot; no model call was made.*
+*Staged UI demo: two captures of the same DE/FR review component with synthetic listing data and mocked API responses. Ricardo publishing currently uses a stub. [Visual provenance](docs/hero-visual.md).*
 
 ## What it does
 
