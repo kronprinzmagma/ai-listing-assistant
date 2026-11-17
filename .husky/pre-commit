@@ -1,1 +1,12 @@
+# husky setzt core.hooksPath fuer dieses Repo und ueberdeckt damit einen global
+# konfigurierten Hook-Ordner. Ist global einer gesetzt (z. B. gitleaks mit eigenen
+# PII-Regeln), zuerst dessen pre-commit ausfuehren; ohne globalen Hook passiert nichts.
+global_hooks=$(git config --global core.hooksPath 2>/dev/null)
+if [ -n "$global_hooks" ]; then
+  global_hooks=$(eval echo "$global_hooks")
+  if [ -x "$global_hooks/pre-commit" ]; then
+    "$global_hooks/pre-commit" || exit 1
+  fi
+fi
+
 npx lint-staged

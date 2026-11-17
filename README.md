@@ -8,9 +8,15 @@
 
 > **Status:** The pipeline from photo to reviewed listing works end to end. Publishing runs against a stub Ricardo.ch client until partner API access is granted; the MCP server package wraps the same client.
 
-![Two staged captures of the actual listing review component: editable German and French listings for a fictional desk lamp, before approval](docs/review-de-fr.png)
-
-*Staged UI demo: two captures of the same DE/FR review component with synthetic listing data and mocked API responses. Ricardo publishing currently uses a stub. [Visual provenance](docs/hero-visual.md).*
+<!-- HERO-VISUAL — bitte hier ein Bild einfügen (stärkster visueller Hebel):
+     Screenshot-Strecke der 5-Phasen-Wizard-UI (Upload → Analyse → Rückfragen
+     → Inserat → Review), idealerweise als eine zusammengesetzte Grafik oder
+     ein kurzes GIF eines echten Durchlaufs.
+     1. Bild ablegen unter  docs/wizard-walkthrough.png  und den Pfad in die
+        Sync-Allowlist in .github/workflows/push-to-public.yml aufnehmen.
+     2. Folgende Zeile einkommentieren:
+![5-Phasen-Wizard von Foto zu Inserat](docs/wizard-walkthrough.png)
+-->
 
 ## What it does
 
