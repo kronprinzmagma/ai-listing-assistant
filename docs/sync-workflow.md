@@ -7,11 +7,12 @@ copy of this private repo to the public portfolio repo on every push to `main`.
 
 1. Checkout the private repo at the pushed commit
 2. Build a `staging/` directory containing ONLY the allowlisted paths
-3. Grep for `sk-ant-` and other credential patterns — abort if any match
-4. Run `secretlint` against the staging tree
-5. Clone the public repo using `PAT_PUBLIC_REPO`
-6. rsync staging content into the public repo (preserving `.git/`)
-7. Commit and push to `main` of the public repo
+3. Verify the staged README hero, PNG signature and provenance link; abort before the public checkout changes if anything is missing
+4. Grep for `sk-ant-` and other credential patterns — abort if any match
+5. Run `secretlint` against the staging tree
+6. Clone the public repo using `PAT_PUBLIC_REPO`
+7. rsync staging content into the public repo (preserving `.git/`)
+8. Commit and push to `main` of the public repo
 
 ## Allowlist (what gets published)
 
@@ -44,8 +45,8 @@ Everything NOT listed above. Notable exclusions:
 
 1. Edit `.github/workflows/push-to-public.yml`
 2. Add the new path under the `rsync -av --relative` block, e.g. `private/new-dir`
-3. Update this doc's allowlist table with a rationale
-4. Commit, push, watch the workflow run
+4. Update this doc's allowlist table with a rationale
+5. Commit, push, watch the workflow run
 
 Do NOT add paths casually. Every entry must have a documented rationale.
 
@@ -69,3 +70,9 @@ Do NOT add paths casually. Every entry must have a documented rationale.
 ## Public repo
 
 https://github.com/kronprinzmagma/ai-listing-assistant
+
+## README hero guard
+
+The working repository contains `scripts/verify_public_hero.py` and `tests/test_public_hero.py`. The publish workflow first runs the six offline tests, then calls the guard against `staging/private` after allowlist filtering. It requires the active `docs/review-de-fr.png` Markdown image, a PNG signature, and the linked `docs/hero-visual.md` file. A commented-out reference, absent or invalid image, or missing provenance stops the job before cloning or changing the public repository.
+
+These private maintenance scripts are intentionally outside the public sync allowlist. In the working repository, run `python3 -m unittest discover -s tests -p test_public_hero.py` and `python3 scripts/verify_public_hero.py --root .` to check the contract. Existing credential scans, secretlint and public-file selection are unchanged.

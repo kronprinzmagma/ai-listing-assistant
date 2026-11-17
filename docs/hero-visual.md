@@ -25,3 +25,7 @@ Fictional unbranded blue metal desk lamp, used/good condition, CHF 25, collectio
 The visual and this public README are maintained together in the working repository. The existing publish workflow already includes the complete docs directory in its allowlist and copies it to the public mirror. The source now contains both this provenance file and docs/review-de-fr.png, so subsequent syncs restore the intended image instead of replacing it with a different source version.
 
 Update the source README and asset together. Keep the embedded synthetic-demo label and the caption explaining the mocked API responses. Existing privacy checks remain in place. Public-only edits can still be overwritten by design; make future visual changes in the working repository.
+
+### Automatic publication guard
+
+Before the public checkout is changed, the publish workflow runs six deterministic contract tests and validates the actual staged README, PNG signature and provenance file. A missing image, commented-out reference, invalid PNG or absent provenance stops the job with a non-zero exit code. The existing credential and secretlint checks still run afterwards. The guard and its tests are maintained in the working repository, outside the public source allowlist.
