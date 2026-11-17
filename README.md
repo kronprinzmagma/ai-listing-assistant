@@ -8,15 +8,9 @@
 
 > **Status:** The pipeline from photo to reviewed listing works end to end. Publishing runs against a stub Ricardo.ch client until partner API access is granted; the MCP server package wraps the same client.
 
-<!-- HERO-VISUAL — bitte hier ein Bild einfügen (stärkster visueller Hebel):
-     Screenshot-Strecke der 5-Phasen-Wizard-UI (Upload → Analyse → Rückfragen
-     → Inserat → Review), idealerweise als eine zusammengesetzte Grafik oder
-     ein kurzes GIF eines echten Durchlaufs.
-     1. Bild ablegen unter  docs/wizard-walkthrough.png  und den Pfad in die
-        Sync-Allowlist in .github/workflows/push-to-public.yml aufnehmen.
-     2. Folgende Zeile einkommentieren:
-![5-Phasen-Wizard von Foto zu Inserat](docs/wizard-walkthrough.png)
--->
+![The five wizard steps from photo to reviewed listing](docs/wizard-walkthrough.png)
+
+*Screenshots of the running app with a synthetic example (a drawn moka pot, invented answers). The agent outputs were pre-filled for the screenshot; no model call was made.*
 
 ## What it does
 
@@ -96,17 +90,46 @@ npm run eval:v3   # feature-keyword directive + 3-sentence formula
 
 Results are committed to [`evals/results/progression.md`](evals/results/progression.md). Each run JSON is committed alongside, including runs that contain failures.
 
+The same cases and graders also run through promptfoo, with all three prompt versions side by side ([`evals/promptfooconfig.yaml`](evals/promptfooconfig.yaml)). The private source repository runs this config manually in GitHub Actions with [promptfoo-action](https://github.com/promptfoo/promptfoo-action); it is `workflow_dispatch` only because each run costs API credits. Locally:
+
+```bash
+NODE_OPTIONS='--import tsx' npx promptfoo eval -c evals/promptfooconfig.yaml --no-share
+```
+
 ## Eval results
 
-| Prompt Version | Title Avg Score | Description Avg Score | Category Exact Match |
-|---------------|-----------------|----------------------|----------------------|
-| v1 (baseline) | 0.94 | 0.94 | 100% |
-| v2 | 0.93 | 0.97 | 100% |
-| v3 | 0.93 (9/10 cases) | 0.97 (9/10 cases) | 100% |
+Measured on 2026-05-21 with `evals/run-eval.ts`, one run per version, 10 cases. Claude Sonnet 4.6 writes the listings and also grades them.
+
+| Prompt Version | Title Avg Score | Description Avg Score | Category Exact Match | Source |
+|---------------|-----------------|----------------------|----------------------|--------|
+| v1 (baseline) | 0.94 | 0.94 | 100% | [run JSON](evals/results/run-v1-2026-05-21T12-17-12-235Z.json) |
+| v2 | 0.93 | 0.97 | 100% | [run JSON](evals/results/run-v2-2026-05-21T12-20-50-028Z.json) |
+| v3 | 0.93 (9/10 cases) | 0.97 (9/10 cases) | 100% | [run JSON](evals/results/run-v3-2026-05-21T12-24-06-841Z.json) |
+
+promptfoo run in CI: not yet measured.
 
 Full score breakdown and honest notes on regressions: [`evals/results/progression.md`](evals/results/progression.md)
 
 Eval methodology and grader rubrics: [`docs/eval-report.md`](docs/eval-report.md)
+
+## Metrics status
+
+Every quality or cost statement about this project is labeled by how it is backed:
+
+- **MEASURED**: backed by a committed result file in this repo.
+- **ASSUMPTION**: a set value or interpretation that no measurement backs yet.
+- **UNMEASURED**: no data yet; no number is claimed.
+
+| Statement | Status | Basis |
+|-----------|--------|-------|
+| Title, description and category scores per prompt version (table above) | MEASURED | Run JSONs in `evals/results/`; one run each; title and description by LLM judge, category by exact match; German fields only |
+| v2 to v3 title and description changes are within run-to-run noise | ASSUMPTION | Single run per version; no repeated runs to estimate variance |
+| Pass threshold 0.8 for title and description in the promptfoo config | ASSUMPTION | Starting value, not calibrated |
+| Quality of the generated French text | UNMEASURED | Graders score the German fields only |
+| Price estimate quality (PriceEstimator) | UNMEASURED | Cases contain an expected price range, but no grader checks prices |
+| Image analysis accuracy (ImageAnalyzer) | UNMEASURED | Eval cases skip image analysis; photos are not committed |
+| Cost per listing (tokens, CHF) | UNMEASURED | `agentTrace` records tokens per agent call, but no runs have been aggregated |
+| End-to-end latency per listing | UNMEASURED | `agentTrace` records `durationMs`; not aggregated yet |
 
 ## Project structure
 
@@ -120,9 +143,10 @@ src/
 packages/
   ricardo-mcp/     # Standalone, publish-ready MCP server package for Ricardo.ch API integration
 evals/
-  cases/           # 10 test cases: gold-standard listings, user answers (photos not committed)
+  cases/           # 10 test cases: product metadata + gold-standard listings (photos not committed)
   graders/         # LLM-as-judge graders: title, description, category
   prompts/         # Versioned listing prompts (v1, v2, v3)
+  promptfoo/       # Test loader and assertions for promptfooconfig.yaml
   results/         # Committed run JSONs + progression.md score table
 docs/
   architecture.md  # Detailed system diagram + component responsibilities
@@ -137,7 +161,7 @@ docs/
 - **Zod**: Agent output schemas and validation contracts
 - **sharp**: Server-side image resizing before API calls
 - **Vitest**: Unit tests for agents and graders
-- **promptfoo**: installed; the evals currently run through `evals/run-eval.ts`
+- **promptfoo**: side-by-side eval of the prompt versions (`evals/promptfooconfig.yaml`); `evals/run-eval.ts` writes the committed run JSONs
 - **MCP SDK** (`@modelcontextprotocol/sdk`): Ricardo.ch tool server in `packages/ricardo-mcp`
 
 ## How this repo is published

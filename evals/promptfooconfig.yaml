@@ -1,18 +1,51 @@
-description: "AI Listing Assistant — Phase 2 Eval Framework"
+# Prompt-Vergleich ListingWriter v1/v2/v3 mit promptfoo (LLM-as-judge).
+#
+# Dieselben 10 Gold-Faelle und Grader wie `npm run eval:v1..v3` (run-eval.ts),
+# aber alle drei Prompt-Versionen in einem Lauf nebeneinander. Gestartet wird
+# es in GitHub ueber den Workflow «Prompt-Evals» (.github/workflows/eval.yml,
+# promptfoo-action, nur workflow_dispatch) oder lokal:
+#
+#   NODE_OPTIONS='--import tsx' npx promptfoo eval -c evals/promptfooconfig.yaml --no-share
+#
+# Braucht ANTHROPIC_API_KEY in der Umgebung (wie src/lib/anthropic.ts) und kostet
+# API-Guthaben: pro Fall und Version ein bis zwei ListingWriter-Aufrufe plus zwei
+# Grader-Aufrufe, also rund 90-120 Aufrufe pro vollem Lauf.
+#
+# Pfade mit file:// sind relativ zu diesem Ordner (evals/).
+
+description: "ListingWriter-Prompts v1-v3 gegen 10 Gold-Faelle"
+
+sharing: false
+
+# Der Provider baut den Prompt selbst aus evals/prompts/listing-<version>.txt;
+# der promptfoo-Prompt dient nur als Fallname in der Ergebnistabelle.
+prompts:
+  - "{{caseId}}"
 
 providers:
-  - id: file://evals/providers/listing-provider.ts
-    label: listing-writer-v1
+  - id: file://providers/listing-provider.ts
+    label: listing-v1
     config:
       promptVersion: v1
-
-prompts:
-  - file://evals/prompts/listing-v1.txt
-
-# tests are loaded programmatically in run-eval.ts from loadCases();
-# we keep an empty marker here for promptfoo CLI compatibility.
-tests: []
+  - id: file://providers/listing-provider.ts
+    label: listing-v2
+    config:
+      promptVersion: v2
+  - id: file://providers/listing-provider.ts
+    label: listing-v3
+    config:
+      promptVersion: v3
 
 defaultTest:
-  options:
-    provider: anthropic:messages:claude-sonnet-4-6
+  assert:
+    - type: javascript
+      value: file://promptfoo/assertions.ts:title
+      metric: titel
+    - type: javascript
+      value: file://promptfoo/assertions.ts:description
+      metric: beschreibung
+    - type: javascript
+      value: file://promptfoo/assertions.ts:category
+      metric: kategorie
+
+tests: file://promptfoo/tests.ts

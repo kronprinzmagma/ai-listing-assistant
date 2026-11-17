@@ -128,18 +128,15 @@ describe('main()', () => {
   // Test 6: provider receives promptTemplate from vars
   it('callApi is invoked with promptTemplate in vars when promptVersion is set', async () => {
     const { main } = await import('./run-eval')
-    await main({ promptVersion: 'v1' })
+    const result = await main({ promptVersion: 'v1' })
     // The callApi mock should have been called with vars containing promptTemplate
     const callArgs = mockCallApi.mock.calls[0]
     const context = callArgs[1] as { vars?: Record<string, unknown> }
     expect(context?.vars).toHaveProperty('promptTemplate')
     expect(typeof context.vars!.promptTemplate).toBe('string')
-    // Clean up any written files
-    const resultsDir = path.join(process.cwd(), 'evals/results')
-    const files = fs.readdirSync(resultsDir).filter(f => f.startsWith('run-v1-') && f.endsWith('.json'))
-    for (const f of files) {
-      try { fs.unlinkSync(path.join(resultsDir, f)) } catch { /* ignore */ }
-    }
+    // Nur die Datei dieses Laufs entfernen. Frueher loeschte der Test alle
+    // run-v1-*.json und damit auch die eingecheckte v1-Baseline.
+    if (fs.existsSync(result.outPath)) fs.unlinkSync(result.outPath)
   })
 
   // EVAL-07: error cases are recorded in result JSON, not dropped

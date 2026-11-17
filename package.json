@@ -13,6 +13,7 @@
     "eval:v1": "tsx evals/run-eval.ts v1",
     "eval:v2": "tsx evals/run-eval.ts v2",
     "eval:v3": "tsx evals/run-eval.ts v3",
+    "eval:injection": "PROMPTFOO_DISABLE_REMOTE_GENERATION=true PROMPTFOO_DISABLE_TELEMETRY=1 PROMPTFOO_DISABLE_UPDATE=1 NODE_OPTIONS='--import tsx' promptfoo eval -c evals/redteam/promptfooconfig.yaml --no-cache --max-concurrency 2",
     "prepare": "husky"
   },
   "lint-staged": {

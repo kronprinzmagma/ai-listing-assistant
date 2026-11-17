@@ -14,10 +14,11 @@ The eval framework uses an LLM-as-judge approach: Claude Sonnet 4.6 grades each 
 
 The `evals/cases/` directory contains 10 real-product test cases. Each case is a JSON file with:
 
-- **Product photos** — references to `evals/cases/images/{case-id}/` (real item photos)
-- **Synthesized `AnalysisResult`** — gold-standard image analysis output
-- **User answers** — pre-supplied answers to the question-generation step (simulating a real session)
+- **Product metadata** — product name, category, condition, expected price range in CHF
 - **Gold-standard listing** — hand-authored DE/FR listing used as grader reference
+- **Photo references** — paths under `evals/cases/images/{case-id}/`; the photos themselves are not committed and the eval does not use them
+
+The eval provider (`evals/providers/listing-provider.ts`) builds the `AnalysisResult` at runtime from the gold listing and passes no user answers. The scores therefore measure the ListingWriter alone, not image analysis or the question flow.
 
 The 10 cases cover a range of product categories: iPhone 14, IKEA Kallax shelf, Nintendo Switch, road bike, winter jacket, coffee machine, Lego Technic, headphones, book set, laptop. This spread tests the listing writer across price ranges, condition levels, and description complexity.
 
@@ -36,6 +37,16 @@ npm run eval:v3   # further improved: feature-keyword directive, 3-sentence form
 Results are written to `evals/results/` as timestamped JSON files. The `run-eval.ts` runner loads all 10 cases, calls the ListingWriter agent with each prompt version, applies all three graders, and writes the scored output.
 
 Notably, the v3 run committed a JSON parse error on case `05-winterjacke` (EVAL-07 honest-notes requirement). The result file is not edited or cherry-picked — the error is visible in the committed JSON. The `evals/results/progression.md` score table documents the impact on aggregates (v3 scores are computed over 9/10 successful cases).
+
+## Running in CI (promptfoo)
+
+`evals/promptfooconfig.yaml` runs the same 10 cases and graders through promptfoo, with v1, v2 and v3 side by side as three providers. The private source repository runs it in a manual GitHub Actions workflow via [promptfoo-action](https://github.com/promptfoo/promptfoo-action) (`workflow_dispatch` only, because every run costs API credits) and writes average scores per version into the run summary. Locally:
+
+```bash
+NODE_OPTIONS='--import tsx' npx promptfoo eval -c evals/promptfooconfig.yaml --no-share
+```
+
+A test passes when title and description score at least 0.8 and the category matches exactly. The 0.8 threshold is a starting value, not calibrated.
 
 ## Score Progression
 

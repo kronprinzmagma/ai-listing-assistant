@@ -15,6 +15,8 @@ Run files:
 - v2: `run-v2-2026-05-21T12-20-50-028Z.json`
 - v3: `run-v3-2026-05-21T12-24-06-841Z.json`
 
+Also committed: `run-2026-05-21T11-56-31-139Z.json`, an earlier smoke run over only 2 cases (before prompt versioning). It is not part of the table.
+
 ---
 
 ## Key Changes
