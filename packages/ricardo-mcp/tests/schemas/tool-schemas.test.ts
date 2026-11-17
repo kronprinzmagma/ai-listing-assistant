@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { ConditionSchema, RicardoListingDetailSchema } from '../../src/schemas/ricardo.js'
-import { CreateListingInputSchema, UploadImageInputSchema, UpdateOrderStatusInputSchema } from '../../src/schemas/tool-inputs.js'
-import { CreateListingOutputSchema, DeleteListingOutputSchema } from '../../src/schemas/tool-outputs.js'
+import { ConditionSchema } from '../../src/schemas/ricardo.js'
+import { CreateListingInputSchema, UploadImageInputSchema } from '../../src/schemas/tool-inputs.js'
+import { CreateListingOutputSchema } from '../../src/schemas/tool-outputs.js'
 import { TypedErrorSchema, makeTypedError } from '../../src/schemas/errors.js'
 
 describe('ConditionSchema', () => {
