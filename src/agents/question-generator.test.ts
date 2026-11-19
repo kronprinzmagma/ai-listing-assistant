@@ -31,7 +31,7 @@ describe('runQuestionGenerator', () => {
       expect(q.text.length).toBeGreaterThan(0)
     }
     expect(trace.agent).toBe('QuestionGenerator')
-    expect(trace.modelUsed).toBe('claude-sonnet-4-6')
+    expect(trace.modelUsed).toBe('claude-sonnet-5-5')
   })
 
   it('calls anthropic.messages.parse once with output_config', async () => {

@@ -56,7 +56,7 @@ describe('runImageAnalyzer', () => {
     expect(output.condition).toBe('gut')
     expect(output.titleDraft.length).toBeLessThanOrEqual(60)
     expect(trace.agent).toBe('ImageAnalyzer')
-    expect(trace.modelUsed).toBe('claude-sonnet-4-6')
+    expect(trace.modelUsed).toBe('claude-sonnet-5-5')
     expect(typeof trace.durationMs).toBe('number')
     expect(trace.durationMs).toBeGreaterThanOrEqual(0)
     expect(new Date(trace.completedAt).toString()).not.toBe('Invalid Date')

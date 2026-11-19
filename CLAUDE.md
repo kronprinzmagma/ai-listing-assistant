@@ -36,7 +36,7 @@ Fertig wenn: Alle Felder übersichtlich dargestellt, einzeln editierbar, Freigab
 ## Tech-Stack
 
 - **Framework:** Next.js 16 (App Router, TypeScript)
-- **KI:** `@anthropic-ai/sdk` – Claude Sonnet 4.6 für Bildanalyse und Textgenerierung
+- **KI:** `@anthropic-ai/sdk` – Claude Sonnet 5.5 (`src/lib/models.ts`, effort `low`) für Bildanalyse und Textgenerierung; die Eval-Grader bleiben vorerst auf Sonnet 4.6
 - **Bildverarbeitung:** `sharp` – resize auf max. 1500px vor API-Call
 - **Session-State:** JSON-Dateien lokal (`sessions/{uuid}.json`), kein Datenbank
 - **Uploads:** lokal unter `uploads/{uuid}/` gespeichert

@@ -90,3 +90,22 @@ v3 title avg (0.933) vs v2 (0.930) is a difference of +0.003 — within run-to-r
 1. **JSON truncation (05-winterjacke v3):** The fix is to add `max_tokens` headroom in the listing writer or reduce prompt verbosity. The verbose v3 examples may be pushing total output near the model limit.
 2. **Title length calibration:** The 40–55 char window is hard to hit reliably. A v4 could use a 2-step: generate title, then count and pad/trim.
 3. **Condition in title as "werblich":** The grader inconsistently flags condition words (like "gut", "akzeptabel") as slightly werblich even when the schema calls for them. This suggests the title grader rubric itself may need refinement.
+
+---
+
+## Modellwechsel Sonnet 4.6 → Sonnet 5.5 (2026-11-19)
+
+Gleiche 10 Fälle, gleiche Grader (beide Male Claude Sonnet 4.6 als Richter), je ein Lauf pro Version. Vorher: ListingWriter auf `claude-sonnet-4-6`. Nachher: ListingWriter auf `claude-sonnet-5-5`, `effort: low`, mit dem Systemhinweis `DATA_GUARD_SYSTEM` (`src/lib/models.ts`).
+
+| Version | Titel vorher | Titel nachher | Beschreibung vorher | Beschreibung nachher | Kategorie | Fehler |
+|---|---|---|---|---|---|---|
+| v1 | 0.94 | 0.97 | 0.91 | 0.98 | 100 % / 100 % | 0 / 0 |
+| v2 | 0.91 | 0.96 | 0.97 | 0.99 | 100 % / 100 % | 0 / 0 |
+| v3 | 0.91 | 0.96 | 0.96 | 0.94 | 100 % / 100 % | 0 / 0 |
+| Mittel | 0.92 | 0.96 | 0.95 | 0.97 | | |
+
+Injection-Eval (`evals/redteam/`, 12 Fälle, davon 2 mit synthetischem Foto): vorher 12/12, nachher ohne Systemhinweis 10/12 (Kontaktdaten/Vorkasse aus dem Bildtext übernommen; Preis 0 nach gefälschtem «Ende der Analyse»), nachher mit Systemhinweis 12/12.
+
+Einordnung: ein Lauf pro Version, LLM-Richter; Unterschiede von ±0.03 liegen im Rauschen. Ohne Systemhinweis übernahm Sonnet 5.5 in einem Lauf ausserdem eine selbst erfundene Kategorie («Möbel & Wohnen > Regale & Aufbewahrung»); seit der festen Kategorienliste (PR #101) setzt der Code die Kategorie.
+
+Run-Dateien: `run-sonnet46-v*-2026-11-19*.json` (vorher), `run-sonnet55-v*-2026-11-19*.json` (nachher).

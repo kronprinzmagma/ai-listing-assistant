@@ -1,5 +1,6 @@
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { anthropic } from '@/lib/anthropic'
+import { AGENT_MODEL, AGENT_EFFORT, DATA_GUARD_SYSTEM } from '@/lib/models'
 import {
   RicardoListingSchema,
   RicardoListingDraftSchema,
@@ -13,7 +14,7 @@ import {
 import { categoryFr, toCategoryDe } from '@/lib/categories'
 import type { AgentTraceEntry, Question } from '@/types/session'
 
-const MODEL = 'claude-sonnet-4-6'
+const MODEL = AGENT_MODEL
 
 export interface ListingWriterInput {
   analysis: StoredAnalysis
@@ -54,9 +55,10 @@ Wichtig:
 async function generateCall(prompt: string) {
   return anthropic.messages.parse({
     model: MODEL,
-    max_tokens: 2048,
+    system: DATA_GUARD_SYSTEM,
+    max_tokens: 8000,
     messages: [{ role: 'user', content: prompt }],
-    output_config: { format: zodOutputFormat(RicardoListingDraftSchema) },
+    output_config: { format: zodOutputFormat(RicardoListingDraftSchema), effort: AGENT_EFFORT },
   })
 }
 
@@ -78,9 +80,10 @@ async function correctCall(prompt: string, prior: RicardoListingDraft, issues: s
   const correctionPrompt = `${prompt}\n\nVorheriger Entwurf hatte Probleme. Bitte korrigieren:\n${issues.map(i => `- ${i}`).join('\n')}\n\nVorheriger Entwurf:\n${JSON.stringify(prior)}`
   return anthropic.messages.parse({
     model: MODEL,
-    max_tokens: 2048,
+    system: DATA_GUARD_SYSTEM,
+    max_tokens: 8000,
     messages: [{ role: 'user', content: correctionPrompt }],
-    output_config: { format: zodOutputFormat(RicardoListingDraftSchema) },
+    output_config: { format: zodOutputFormat(RicardoListingDraftSchema), effort: AGENT_EFFORT },
   })
 }
 

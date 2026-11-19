@@ -58,7 +58,7 @@ describe('createSession + writeSession + readSession round-trip', () => {
       output: { ok: true },
       durationMs: 42,
       completedAt: new Date().toISOString(),
-      modelUsed: 'claude-sonnet-4-6',
+      modelUsed: 'claude-sonnet-5-5',
     }]
     await writeSession(s)
     const reloaded = await readSession(s.id)

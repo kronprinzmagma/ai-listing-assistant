@@ -40,7 +40,7 @@ flowchart TD
     end
 
     subgraph External["External Services"]
-        E1[Anthropic API\nClaude Sonnet 4.6]
+        E1[Anthropic API\nClaude Sonnet 5.5]
                 C1[Ricardo client\npackages/ricardo-mcp\nstub until partner API access]
         E2[Ricardo.ch]
     end

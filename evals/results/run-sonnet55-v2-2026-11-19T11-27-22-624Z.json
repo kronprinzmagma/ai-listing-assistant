@@ -1,0 +1,102 @@
+{
+  "runId": "run-v2-2026-11-19T11-27-22-624Z",
+  "timestamp": "2026-11-19T11-27-22-624Z",
+  "promptVersion": "v2",
+  "cases": [
+    {
+      "caseId": "01-iphone-14",
+      "titleScore": 1,
+      "titleRationale": "Der Titel entspricht exakt der Gold-Referenz: Er nennt Hersteller, Modell, Speichervariante und Farbe (Specificity 3), ist mit 40 Zeichen optimal lang (Length 2), enthält alle relevanten Suchbegriffe wie Apple, iPhone, 14, 128GB und Midnight (Keywords 3) und ist vollständig sachlich ohne werbliche Übertreibungen (No-Clickbait 2).",
+      "descriptionScore": 1,
+      "descriptionRationale": "Die Beschreibung deckt alle relevanten Fakten korrekt ab (Zustand, Akku, Verpackung, Netzentstperrung) und stimmt vollständig mit der Gold-Referenz überein. Der Ton ist sachlich und die Länge liegt im optimalen Bereich.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Smartphones\""
+    },
+    {
+      "caseId": "02-ikea-kallax",
+      "titleScore": 1,
+      "titleRationale": "Der Titel entspricht exakt der Gold-Referenz und erfüllt alle Kriterien optimal: Er nennt Hersteller, Modell, Variante (4x4) und Farbe, ist mit 42 Zeichen in der idealen Länge, enthält alle relevanten Suchbegriffe und ist vollständig sachlich formuliert.",
+      "descriptionScore": 1,
+      "descriptionRationale": "Die Beschreibung deckt alle relevanten Fakten korrekt ab (Zustand, Produktdetails, Abmessungen, Abholung) und stimmt vollständig mit der Gold-Referenz überein. Ton ist sachlich, Länge optimal.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Möbel\""
+    },
+    {
+      "caseId": "03-nintendo-switch",
+      "titleScore": 0.9,
+      "titleRationale": "Der Titel nennt exakt das Produkt, Modell und Variante (Nintendo Switch OLED weiss) und ist sachlich formuliert ohne Übertreibungen. Mit 36 Zeichen liegt er knapp unter dem optimalen Bereich von 40-60 Zeichen.",
+      "descriptionScore": 1,
+      "descriptionRationale": "Die Beschreibung ist faktisch vollständig gedeckt durch Produktkontext und Gold-Referenz, enthält alle drei Aspekte (Zustand, Eigenschaften, Versand) und ist sachlich sowie präzise formuliert. Sie entspricht in Inhalt und Länge nahezu identisch der Gold-Referenz.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Spielzeug\""
+    },
+    {
+      "caseId": "04-rennrad",
+      "titleScore": 1,
+      "titleRationale": "Der Titel nennt Marke, Modell, Produkttyp, Rahmengrösse und Komponente (Shimano 105), was alle relevanten Suchbegriffe abdeckt und sehr spezifisch ist. Im Vergleich zur Gold-Referenz ist der zu bewertende Titel sogar informativer, da er die Schaltgruppe explizit nennt.",
+      "descriptionScore": 1,
+      "descriptionRationale": "Die Beschreibung deckt alle Fakten korrekt ab (Modell, Rahmengrösse, Gruppe, Zustand, Bremsbeläge, Versand) und stimmt vollständig mit der Gold-Referenz und dem Produktkontext überein. Ton ist sachlich, Länge optimal.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Fahrrad\""
+    },
+    {
+      "caseId": "05-winterjacke",
+      "titleScore": 1,
+      "titleRationale": "Der Titel enthält alle relevanten Informationen: Marke (Arc'teryx), Modell (Beta AR), Produkttyp (Jacke), Grösse (M) und Zustandsangabe (gut). Das Wort 'Hardshell' ist ein zusätzliches nützliches Keyword, das die Gold-Referenz nicht enthält, und schadet dem Titel nicht.",
+      "descriptionScore": 1,
+      "descriptionRationale": "Alle Aussagen sind durch den Produktkontext und die Gold-Referenz vollständig gedeckt – keine Halluzinationen. Zustand, Produkteigenschaften und Versand sind vollständig erwähnt, der Ton ist sachlich und die Länge optimal.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Kleidung\""
+    },
+    {
+      "caseId": "06-kaffeemaschine",
+      "titleScore": 0.9,
+      "titleRationale": "Der Titel enthält Hersteller, Modell und Produkttyp – alle relevanten Keywords sind vorhanden und die Länge ist optimal. Der Zusatz '– gut' ist leicht werblich und subjektiv, was den sachlichen Ton minimal beeinträchtigt.",
+      "descriptionScore": 0.9,
+      "descriptionRationale": "Die Beschreibung ist sachlich, knapp und deckt Zustand, Funktionalität und Versand ab. Lediglich der Markenname und das Modell (DeLonghi Magnifica S) fehlen, was eine geringfügige Abweichung von der Faktengrundlage darstellt.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Küche\""
+    },
+    {
+      "caseId": "07-lego-technic",
+      "titleScore": 0.9,
+      "titleRationale": "Der Titel enthält alle relevanten Keywords und das exakte Modell (LEGO Technic 42096 Porsche 911 RSR), ist jedoch durch den Zusatz '– akzeptabel' leicht werblich/bewertend gefärbt, was den sachlichen Ton minimal beeinträchtigt. Die Länge von 47 Zeichen liegt optimal im Zielbereich.",
+      "descriptionScore": 1,
+      "descriptionRationale": "Alle Aussagen sind vollständig durch den Produktkontext und die Gold-Referenz gedeckt – keine Halluzinationen. Zustand, relevante Eigenschaften (Vollständigkeit, Bauanleitung, Karton) und Versandoptionen werden klar und sachlich erwähnt.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Spielzeug\""
+    },
+    {
+      "caseId": "08-kopfhoerer",
+      "titleScore": 1,
+      "titleRationale": "Der Titel nennt Hersteller, exaktes Modell, Produkttyp, Technologie (ANC) und Zustand – alle relevanten Suchbegriffe sind enthalten und der Ton ist vollständig sachlich. Mit 48 Zeichen liegt er optimal im Zielbereich von 40–60 Zeichen.",
+      "descriptionScore": 1,
+      "descriptionRationale": "Alle Aussagen sind durch den Produktkontext und die Gold-Referenz vollständig gedeckt – Zustand, Zubehör und Versand werden korrekt und vollständig erwähnt. Der Ton ist sachlich und neutral, die Länge liegt im optimalen Bereich.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Audio\""
+    },
+    {
+      "caseId": "09-buch-set",
+      "titleScore": 1,
+      "titleRationale": "Der Titel nennt exakt das Produkt (Harry Potter Bände 1-7), die Sprache (deutsch), den Zustand (gut) und ergänzt sinnvoll das Format (Taschenbuch) gegenüber der Gold-Referenz. Alle relevanten Suchbegriffe sind enthalten, der Ton ist sachlich und die Länge liegt mit 48 Zeichen im optimalen Bereich.",
+      "descriptionScore": 1,
+      "descriptionRationale": "Die Beschreibung deckt alle relevanten Fakten aus dem Produktkontext und der Gold-Referenz vollständig ab: Zustand, Seitenanzahl, Gebrauchsspuren, Sprachversion, Bandanzahl und Versand. Sie ist präzise, sachlich und im optimalen Zeichenbereich.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Bücher\""
+    },
+    {
+      "caseId": "10-laptop",
+      "titleScore": 0.9,
+      "titleRationale": "Der Titel ist sehr spezifisch und enthält alle relevanten Keywords (Modell, Generation, CPU, RAM). Das Suffix '– akzeptabel' ist leicht werblich/bewertend und sollte vermieden werden, da sachliche Titel ohne subjektive Einschätzungen besser performen.",
+      "descriptionScore": 1,
+      "descriptionRationale": "Alle Aussagen sind durch den Produktkontext und die Gold-Referenz vollständig gedeckt – keine Halluzinationen. Zustand, relevante technische Eigenschaften und Versandoption sind klar und sachlich erwähnt.",
+      "categoryScore": 1,
+      "categoryRationale": "Exact category match: \"Laptops\""
+    }
+  ],
+  "aggregates": {
+    "titleAvg": 0.9600000000000002,
+    "descriptionAvg": 0.99,
+    "categoryExactMatchRate": 1
+  }
+}

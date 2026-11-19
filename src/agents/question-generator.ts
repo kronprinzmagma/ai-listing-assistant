@@ -1,10 +1,11 @@
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { v4 as uuidv4 } from 'uuid'
 import { anthropic } from '@/lib/anthropic'
+import { AGENT_MODEL, AGENT_EFFORT, DATA_GUARD_SYSTEM } from '@/lib/models'
 import { QuestionsOutputSchema, type StoredAnalysis } from './schemas'
 import type { AgentTraceEntry, Question } from '@/types/session'
 
-const MODEL = 'claude-sonnet-4-6'
+const MODEL = AGENT_MODEL
 
 export interface QuestionGeneratorInput {
   analysis: StoredAnalysis
@@ -28,9 +29,10 @@ Stelle 3-5 kurze Rückfragen auf Deutsch, um fehlende Informationen zu ergänzen
 
   const message = await anthropic.messages.parse({
     model: MODEL,
-    max_tokens: 512,
+    system: DATA_GUARD_SYSTEM,
+    max_tokens: 4000,
     messages: [{ role: 'user', content: prompt }],
-    output_config: { format: zodOutputFormat(QuestionsOutputSchema) },
+    output_config: { format: zodOutputFormat(QuestionsOutputSchema), effort: AGENT_EFFORT },
   })
 
   const parsed = message.parsed_output

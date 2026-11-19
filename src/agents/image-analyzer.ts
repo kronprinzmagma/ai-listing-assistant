@@ -1,10 +1,11 @@
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import sharp from 'sharp'
 import { anthropic } from '@/lib/anthropic'
+import { AGENT_MODEL, AGENT_EFFORT } from '@/lib/models'
 import { AnalysisDraftSchema, AnalysisResultSchema, shortenTitle, type AnalysisResult } from './schemas'
 import type { AgentTraceEntry } from '@/types/session'
 
-const MODEL = 'claude-sonnet-4-6'
+const MODEL = AGENT_MODEL
 
 const PROMPT = `Analysiere die Fotos eines Gegenstands für ein ricardo.ch-Inserat.
 
@@ -44,7 +45,7 @@ export async function runImageAnalyzer(
 
   const message = await anthropic.messages.parse({
     model: MODEL,
-    max_tokens: 1024,
+    max_tokens: 8000,
     messages: [
       {
         role: 'user',
@@ -54,7 +55,7 @@ export async function runImageAnalyzer(
         ],
       },
     ],
-    output_config: { format: zodOutputFormat(AnalysisDraftSchema) },
+    output_config: { format: zodOutputFormat(AnalysisDraftSchema), effort: AGENT_EFFORT },
   })
 
   const draft = message.parsed_output
