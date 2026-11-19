@@ -53,6 +53,13 @@ describe('parseComparable', () => {
     expect(parseComparable(searchResults[1])?.priceCHF).toBe(1250)
     expect(parseComparable({ title: 'Casque (Occasion) à Genève pour CHF 89.50', url: 'https://www.ricardo.ch/fr/a/casque-1/' })?.priceCHF).toBe(89.5)
   })
+  it('nimmt den Angebotspreis am Ende, nicht einen Preis aus dem Verkaeufertitel', () => {
+    const r = parseComparable({
+      title: 'Switch OLED neu für CHF 400 gekauft (Gebraucht) in Bern für CHF 150',
+      url: 'https://www.ricardo.ch/de/a/switch-oled-1000000003/',
+    })
+    expect(r?.priceCHF).toBe(150)
+  })
   it('verwirft Kategorie-Seiten, fremde Domains und Treffer ohne Preis', () => {
     expect(parseComparable(searchResults[2])).toBeNull()
     expect(parseComparable(searchResults[3])).toBeNull()

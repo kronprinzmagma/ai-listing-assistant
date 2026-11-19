@@ -22,12 +22,14 @@ export const MAX_SEARCHES = 2
 export const MAX_COMPARABLES = 8
 
 const LISTING_URL = /^https:\/\/www\.ricardo\.ch\/(de|fr|it)\/a\/[^\s?#]+$/
-const PRICE_IN_TITLE = /\b(?:für|pour|per)\s+CHF\s*([0-9][0-9'’.,]*)/i
+// global: Verkaeufer schreiben selbst Preise in den Titel («NP für CHF 400»). Der
+// Angebotspreis ist der Zusatz der Plattform am Ende, darum zaehlt der letzte Treffer.
+const PRICE_IN_TITLE = /\b(?:für|pour|per)\s+CHF\s*([0-9][0-9'’.,]*)/gi
 
 /** Liest Preis und Link aus einem Suchtreffer; null, wenn es kein Ricardo-Angebot mit Preis ist. */
 export function parseComparable(result: { title: string; url: string; page_age?: string | null }): Comparable | null {
   if (!LISTING_URL.test(result.url)) return null
-  const match = PRICE_IN_TITLE.exec(result.title)
+  const match = [...result.title.matchAll(PRICE_IN_TITLE)].at(-1)
   if (!match) return null
   // 1'250 / 1’250 / 1,250 -> 1250; 12.50 bleibt 12.5
   const raw = match[1].replace(/['’]/g, '').replace(/,(?=\d{3}\b)/g, '').replace(/,/g, '.').replace(/\.$/, '')
