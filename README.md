@@ -96,6 +96,12 @@ The same cases and graders also run through promptfoo, with all three prompt ver
 NODE_OPTIONS='--import tsx' npx promptfoo eval -c evals/promptfooconfig.yaml --no-share
 ```
 
+### Quality eval in GitHub Actions
+
+The workflow **Prompt-Evals** ([`.github/workflows/eval.yml`](.github/workflows/eval.yml)) runs `evals/promptfooconfig.yaml` for v1, v2 and v3 side by side and writes average scores per version and metric to the run summary; the result JSON is kept as a run artifact for 30 days. It starts only by hand (`workflow_dispatch`): no schedule, no runs on pull requests, because every run calls Claude and costs API credits. Without the repository secret `ANTHROPIC_API_KEY` it stops before installing anything and says so in the log and the run summary. It is separate from the prompt-injection evals in [`.github/workflows/injection.yml`](.github/workflows/injection.yml).
+
+Result: not yet measured (first run pending).
+
 ## Eval results
 
 Measured on 2026-05-21 with `evals/run-eval.ts`, one run per version, 10 cases. Claude Sonnet 4.6 writes the listings and also grades them.
@@ -106,7 +112,7 @@ Measured on 2026-05-21 with `evals/run-eval.ts`, one run per version, 10 cases. 
 | v2 | 0.93 | 0.97 | 100% | [run JSON](evals/results/run-v2-2026-05-21T12-20-50-028Z.json) |
 | v3 | 0.93 (9/10 cases) | 0.97 (9/10 cases) | 100% | [run JSON](evals/results/run-v3-2026-05-21T12-24-06-841Z.json) |
 
-promptfoo run in CI: not yet measured.
+Status of this table: MEASURED (sources linked per row). promptfoo run in CI: UNMEASURED, first run pending.
 
 Full score breakdown and honest notes on regressions: [`evals/results/progression.md`](evals/results/progression.md)
 
@@ -125,6 +131,7 @@ Every quality or cost statement about this project is labeled by how it is backe
 | Title, description and category scores per prompt version (table above) | MEASURED | Run JSONs in `evals/results/`; one run each; title and description by LLM judge, category by exact match; German fields only |
 | v2 to v3 title and description changes are within run-to-run noise | ASSUMPTION | Single run per version; no repeated runs to estimate variance |
 | Pass threshold 0.8 for title and description in the promptfoo config | ASSUMPTION | Starting value, not calibrated |
+| Scores from the promptfoo workflow (all three versions in one run) | UNMEASURED | Workflow exists, first run pending |
 | Quality of the generated French text | UNMEASURED | Graders score the German fields only |
 | Price estimate quality (PriceEstimator) | UNMEASURED | Cases contain an expected price range, but no grader checks prices |
 | Image analysis accuracy (ImageAnalyzer) | UNMEASURED | Eval cases skip image analysis; photos are not committed |
