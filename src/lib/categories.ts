@@ -2,9 +2,8 @@
 // Publisher. Das Modell darf nur einen dieser deutschen Namen waehlen (Enum im
 // Antwortschema), der Code setzt den franzoesischen Namen dazu.
 //
-// VORSCHLAG, Stand 2026-11-19: Welche Liste endgueltig gilt, entscheidet Nils
-// (offizielle Ricardo-Hauptkategorien oder diese kurze eigene Liste). Die Liste
-// vereint die bisherigen Eintraege aus category-map.ts und der Eval-Hierarchie
+// Gilt, Entscheid Nils 2026-11-19 (eigene kurze Liste statt der offiziellen
+// Ricardo-Hauptkategorien). Die Liste vereint die bisherigen Eintraege aus category-map.ts und der Eval-Hierarchie
 // (evals/graders/category-grader.ts) plus «Games & Konsolen» und den Auffang-
 // eintrag «Diverses». Die IDs sind Platzhalter wie bisher: echte Ricardo-IDs
 // gibt es erst mit Zugang zur Partner-API (SPIKE-01).
