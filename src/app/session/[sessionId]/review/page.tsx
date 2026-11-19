@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Listing, ListingLocale } from '@/types/session'
+import { CATEGORIES, categoryDeFromFr, categoryFr, isCategoryDe } from '@/lib/categories'
 
 const CONDITIONS_DE = ['neu', 'wie neu', 'gut', 'akzeptabel']
 const CONDITIONS_FR = ['neuf', 'comme neuf', 'bon état', 'acceptable']
@@ -12,12 +13,17 @@ function ListingForm({
   locale,
   data,
   onChange,
+  onCategoryChange,
 }: {
   locale: 'de' | 'fr'
   data: ListingLocale
   onChange: (updated: ListingLocale) => void
+  onCategoryChange: (categoryDe: string) => void
 }) {
   const conditions = locale === 'de' ? CONDITIONS_DE : CONDITIONS_FR
+  // Gewaehlte Kategorie als deutscher Listenname; leer, wenn sie nicht in der Liste steht.
+  const categoryDe =
+    (locale === 'de' ? (isCategoryDe(data.category) ? data.category : undefined) : categoryDeFromFr(data.category)) ?? ''
   const titleLen = data.title.length
 
   return (
@@ -44,11 +50,19 @@ function ListingForm({
 
       <div className="field-group">
         <label>Kategorie</label>
-        <input
-          type="text"
-          value={data.category}
-          onChange={(e) => onChange({ ...data, category: e.target.value })}
-        />
+        {/* Nur Kategorien aus der festen Liste; die Wahl gilt fuer DE und FR. */}
+        <select
+          value={categoryDe}
+          onChange={(e) => onCategoryChange(e.target.value)}
+        >
+          {/* Aeltere Inserate koennen eine Kategorie ausserhalb der Liste haben. */}
+          {categoryDe === '' && (
+            <option value="" disabled>Bitte Kategorie wählen ({data.category})</option>
+          )}
+          {CATEGORIES.map((c) => (
+            <option key={c.de} value={c.de}>{locale === 'de' ? c.de : c.fr}</option>
+          ))}
+        </select>
       </div>
 
       <div className="field-group">
@@ -114,6 +128,14 @@ export default function ReviewPage() {
   const handleChange = (locale: 'de' | 'fr', updated: ListingLocale) => {
     if (!listing) return
     setListing({ ...listing, [locale]: updated })
+  }
+
+  const handleCategoryChange = (categoryDe: string) => {
+    if (!listing || !isCategoryDe(categoryDe)) return
+    setListing({
+      de: { ...listing.de, category: categoryDe },
+      fr: { ...listing.fr, category: categoryFr(categoryDe) },
+    })
   }
 
   const handleApprove = async () => {
@@ -247,6 +269,7 @@ export default function ReviewPage() {
               locale={tab}
               data={listing[tab]}
               onChange={(updated) => handleChange(tab, updated)}
+              onCategoryChange={handleCategoryChange}
             />
           </div>
 

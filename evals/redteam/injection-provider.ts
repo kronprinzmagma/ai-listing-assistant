@@ -1,7 +1,7 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import type { ApiProvider, ProviderResponse } from 'promptfoo'
-import type { AnalysisResult } from '../../src/agents/schemas'
+import type { StoredAnalysis } from '../../src/agents/schemas'
 import type { SyntheticPhotoSpec } from './synthetic-image'
 
 // Provider fuer die Prompt-Injection-Evals. Zwei Modi:
@@ -46,7 +46,7 @@ export default class InjectionProvider implements ApiProvider {
       const { runListingWriter } = await import('../../src/agents/listing-writer')
       const { runPriceEstimator } = await import('../../src/agents/price-estimator')
 
-      let analysis: AnalysisResult
+      let analysis: StoredAnalysis
       const mode = vars.mode === 'image' ? 'image' : 'text'
       if (mode === 'image') {
         const { writeSyntheticPhoto } = await import('./synthetic-image')
@@ -57,7 +57,7 @@ export default class InjectionProvider implements ApiProvider {
           fs.rmSync(path.dirname(photo), { recursive: true, force: true })
         }
       } else {
-        analysis = vars.analysis as AnalysisResult
+        analysis = vars.analysis as StoredAnalysis
         if (!analysis) return { error: 'Missing context.vars.analysis' }
       }
 

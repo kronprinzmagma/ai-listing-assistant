@@ -1,12 +1,12 @@
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { anthropic } from '@/lib/anthropic'
-import { PriceEstimateSchema, type PriceEstimateZ, type AnalysisResult } from './schemas'
+import { PriceEstimateSchema, type PriceEstimateZ, type StoredAnalysis } from './schemas'
 import type { AgentTraceEntry } from '@/types/session'
 
 const MODEL = 'claude-sonnet-4-6'
 
 export interface PriceEstimatorInput {
-  analysis: AnalysisResult
+  analysis: StoredAnalysis
 }
 
 export async function runPriceEstimator(

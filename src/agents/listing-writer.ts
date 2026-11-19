@@ -8,14 +8,15 @@ import {
   type ListingValidation,
   type RicardoListing,
   type RicardoListingDraft,
-  type AnalysisResult,
+  type StoredAnalysis,
 } from './schemas'
+import { categoryFr, toCategoryDe } from '@/lib/categories'
 import type { AgentTraceEntry, Question } from '@/types/session'
 
 const MODEL = 'claude-sonnet-4-6'
 
 export interface ListingWriterInput {
-  analysis: AnalysisResult
+  analysis: StoredAnalysis
   questions: Question[]
   /** When set, use this template instead of the built-in generation prompt.
    *  Placeholders: {{object}}, {{condition}}, {{category}}, {{titleDraft}},
@@ -23,7 +24,7 @@ export interface ListingWriterInput {
   promptOverride?: string
 }
 
-function buildGenerationPrompt(analysis: AnalysisResult, answeredQA: string, promptOverride?: string): string {
+function buildGenerationPrompt(analysis: StoredAnalysis, answeredQA: string, promptOverride?: string): string {
   if (promptOverride) {
     return promptOverride
       .replace(/\{\{object\}\}/g, analysis.object)
@@ -116,9 +117,12 @@ export async function runListingWriter(
   }
 
   // Hard-enforce title length in code: letzte Rueckfallebene, an einer Wortgrenze
+  // Kategorie aus der festen Liste, nicht vom Schreiber: DE aus der Analyse
+  // (Freitext alter Sessions wird zu «Diverses»), FR passend dazu.
+  const categoryDe = toCategoryDe(analysis.category)
   const output: RicardoListing = RicardoListingSchema.parse({
-    de: { ...draft.de, title: shortenTitle(draft.de.title) },
-    fr: { ...draft.fr, title: shortenTitle(draft.fr.title) },
+    de: { ...draft.de, title: shortenTitle(draft.de.title), category: categoryDe },
+    fr: { ...draft.fr, title: shortenTitle(draft.fr.title), category: categoryFr(categoryDe) },
   })
 
   return {

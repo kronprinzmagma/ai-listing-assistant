@@ -2,7 +2,7 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import type { ApiProvider, ProviderOptions, ProviderResponse } from 'promptfoo'
 import { runListingWriter } from '../../src/agents/listing-writer'
-import type { AnalysisResult } from '../../src/agents/schemas'
+import type { StoredAnalysis } from '../../src/agents/schemas'
 import type { TestCase } from '../cases/case-schema'
 
 const PROMPT_VERSIONS = ['v1', 'v2', 'v3'] as const
@@ -44,7 +44,7 @@ export default class ListingProvider implements ApiProvider {
       // Synthesize AnalysisResult from the gold listing — this isolates the
       // ListingWriter from ImageAnalyzer variance, so the eval measures ONLY
       // ListingWriter quality. Image-grounded eval is out of scope for Phase 2.
-      const analysis: AnalysisResult = {
+      const analysis: StoredAnalysis = {
         object: caseData.product,
         condition: caseData.metadata.condition,
         category: caseData.metadata.category,

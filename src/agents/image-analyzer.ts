@@ -11,7 +11,7 @@ const PROMPT = `Analysiere die Fotos eines Gegenstands für ein ricardo.ch-Inser
 Liefere strukturierten Output mit:
 - object: was ist der Gegenstand
 - condition: einer der Werte "neu", "wie neu", "gut", "akzeptabel"
-- category: passende ricardo.ch-Kategorie
+- category: genau eine Kategorie aus der vorgegebenen Liste, die spezifischste passende ("Diverses" nur, wenn keine passt)
 - titleDraft: Titel-Entwurf, maximal 60 Zeichen
 - descriptionDraft: kurze, präzise Beschreibung auf Deutsch`
 

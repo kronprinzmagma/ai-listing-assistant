@@ -1,3 +1,5 @@
+import { CATEGORIES } from '../../src/lib/categories'
+
 export interface CategoryGradeResult {
   exactMatch: boolean
   parentMatch: boolean
@@ -6,29 +8,13 @@ export interface CategoryGradeResult {
   suggestion: string
 }
 
-// CATEGORY_HIERARCHY maps subcategories to their parent.
-// Top-level categories (roots) are not listed here — they have no parent.
-// All keys in CATEGORY_ID_MAP (src/lib/category-map.ts) must be reachable
-// either as a key in this map or as a parent value in this map.
-export const CATEGORY_HIERARCHY: Record<string, string> = {
-  'Smartphones': 'Elektronik',
-  'Laptops': 'Elektronik',
-  'Tablets': 'Elektronik',
-  'Kameras': 'Elektronik',
-  'Audio': 'Elektronik',
-  'Möbel': 'Haushalt',
-  'Küche': 'Haushalt',
-  'Dekoration': 'Haushalt',
-  'Spielzeug': 'Kinder & Familie',
-  'Kinderkleidung': 'Kinder & Familie',
-  'Sport': 'Sport & Outdoor',
-  'Fahrrad': 'Sport & Outdoor',
-  'Fahrräder': 'Sport & Outdoor',
-  'Kleidung': 'Mode',
-  'Schuhe': 'Mode',
-  'Bücher': 'Medien',
-  'Filme': 'Medien',
-}
+// CATEGORY_HIERARCHY ordnet jeder Unterkategorie ihre Oberkategorie zu.
+// Abgeleitet aus der festen Liste (src/lib/categories.ts), damit Eval, Modell-
+// Schema und Publisher dieselben Kategorien kennen. Oberkategorien fehlen als
+// Schluessel, weil sie keine Eltern haben.
+export const CATEGORY_HIERARCHY: Record<string, string> = Object.fromEntries(
+  CATEGORIES.flatMap((c) => ('parent' in c ? [[c.de, c.parent]] : []))
+)
 
 export function gradeCategory(generated: string, expected: string): CategoryGradeResult {
   const exactMatch = generated.toLowerCase() === expected.toLowerCase()

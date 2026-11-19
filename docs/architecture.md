@@ -75,7 +75,7 @@ flowchart TD
 
 | Component | File | Responsibility |
 |-----------|------|----------------|
-| ImageAnalyzer | `src/agents/image-analyzer.ts` | Resizes photos with sharp, sends to Claude vision, returns `AnalysisResult` (object, condition, category, title/description drafts) |
+| ImageAnalyzer | `src/agents/image-analyzer.ts` | Resizes photos with sharp, sends to Claude vision, returns `AnalysisResult` (object, condition, category, title/description drafts); the category must come from the fixed list in `src/lib/categories.ts` (enum in the output schema), which the listing writer, review and publisher share |
 | QuestionGenerator | `src/agents/question-generator.ts` | Given `AnalysisResult`, generates 3–5 targeted questions about non-visible information only |
 | ListingWriter | `src/agents/listing-writer.ts` | Generates a complete bilingual (DE/FR) Ricardo.ch listing; on a `ListingValidationSchema` failure one correction pass, then a hard title cut at 60 characters (PIPE-10) |
 | PriceEstimator | `src/agents/price-estimator.ts` | Estimates CHF price with confidence level and rationale based on object and condition |

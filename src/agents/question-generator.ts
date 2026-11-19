@@ -1,13 +1,13 @@
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { v4 as uuidv4 } from 'uuid'
 import { anthropic } from '@/lib/anthropic'
-import { QuestionsOutputSchema, type AnalysisResult } from './schemas'
+import { QuestionsOutputSchema, type StoredAnalysis } from './schemas'
 import type { AgentTraceEntry, Question } from '@/types/session'
 
 const MODEL = 'claude-sonnet-4-6'
 
 export interface QuestionGeneratorInput {
-  analysis: AnalysisResult
+  analysis: StoredAnalysis
 }
 
 export async function runQuestionGenerator(

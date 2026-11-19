@@ -1,14 +1,20 @@
 import { z } from 'zod'
+import { CATEGORY_LABELS_DE, CATEGORY_LABELS_FR, categoryDeFromFr } from '@/lib/categories'
 
 // ImageAnalyzer output
 export const AnalysisResultSchema = z.object({
   object: z.string().min(1),
   condition: z.enum(['neu', 'wie neu', 'gut', 'akzeptabel']),
-  category: z.string().min(1),
+  // Nur Namen aus der festen Liste (src/lib/categories.ts); das Enum steht im
+  // Antwortschema, das Modell kann also keine eigene Kategorie erfinden.
+  category: z.enum(CATEGORY_LABELS_DE),
   titleDraft: z.string().max(60),
   descriptionDraft: z.string().min(1),
 })
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>
+
+/** Analyse, wie sie in einer Session liegt: aeltere Sessions haben die Kategorie noch als Freitext. */
+export type StoredAnalysis = Omit<AnalysisResult, 'category'> & { category: string }
 
 // Schema fuer den Modellaufruf: ohne Laengengrenze beim Titel-Entwurf. Das SDK
 // prueft .max() erst nach der Antwort und wirft dann (helpers/zod.ts, safeParse);
@@ -33,16 +39,25 @@ export const ListingLocaleSchema = z.object({
 })
 export type ListingLocaleZ = z.infer<typeof ListingLocaleSchema>
 
-export const RicardoListingSchema = z.object({
-  de: ListingLocaleSchema,
-  fr: ListingLocaleSchema,
-})
+// Kategorie: DE und FR aus der festen Liste und zueinander passend. Gilt fuer das
+// fertige Inserat und fuer Aenderungen aus der Review (PATCH /api/listing).
+export const RicardoListingSchema = z
+  .object({
+    de: ListingLocaleSchema.extend({ category: z.enum(CATEGORY_LABELS_DE) }),
+    fr: ListingLocaleSchema.extend({ category: z.enum(CATEGORY_LABELS_FR) }),
+  })
+  .refine((l) => categoryDeFromFr(l.fr.category) === l.de.category, {
+    message: 'fr.category passt nicht zu de.category',
+    path: ['fr', 'category'],
+  })
 export type RicardoListing = z.infer<typeof RicardoListingSchema>
 
 // Schema fuer die Modellaufrufe des ListingWriters: Titel ohne .max(60), damit ein
 // zu langer Titel nicht schon in der SDK-Pruefung als Fehler endet, sondern im Code
 // erkannt, einmal korrigiert und notfalls an einer Wortgrenze gekuerzt wird.
-export const ListingLocaleDraftSchema = ListingLocaleSchema.extend({ title: z.string() })
+// Die Kategorie fehlt im Modell-Schema: sie kommt aus der Analyse (feste Liste) und
+// wird im Code gesetzt, DE und FR passend (listing-writer.ts).
+export const ListingLocaleDraftSchema = ListingLocaleSchema.omit({ category: true }).extend({ title: z.string() })
 export const RicardoListingDraftSchema = z.object({
   de: ListingLocaleDraftSchema,
   fr: ListingLocaleDraftSchema,

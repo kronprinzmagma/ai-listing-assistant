@@ -131,3 +131,23 @@ describe('shortenTitle', () => {
     expect(shortenTitle('X'.repeat(80))).toHaveLength(60)
   })
 })
+
+describe('runListingWriter: Kategorie aus der festen Liste', () => {
+  it('setzt DE und FR aus der Analyse, nicht aus dem Modell', async () => {
+    const fromModel = {
+      de: { ...validListing.de, category: 'Computer & Zubehör' },
+      fr: { ...validListing.fr, category: 'Informatique' },
+    }
+    parseMock.mockResolvedValueOnce({ parsed_output: fromModel, usage: { input_tokens: 1, output_tokens: 1 } })
+    const { output } = await runListingWriter({ analysis: { ...analysis, category: 'Laptops' }, questions: [] })
+    expect(output.de.category).toBe('Laptops')
+    expect(output.fr.category).toBe('Ordinateurs portables')
+  })
+
+  it('Freitext aus einer alten Session wird zu «Diverses»', async () => {
+    parseMock.mockResolvedValueOnce({ parsed_output: validListing, usage: { input_tokens: 1, output_tokens: 1 } })
+    const { output } = await runListingWriter({ analysis: { ...analysis, category: 'Smartphones & Handys' }, questions: [] })
+    expect(output.de.category).toBe('Diverses')
+    expect(output.fr.category).toBe('Divers')
+  })
+})

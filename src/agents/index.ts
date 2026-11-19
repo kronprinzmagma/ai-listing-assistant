@@ -36,6 +36,7 @@ export {
 } from './schemas'
 export type {
   AnalysisResult,
+  StoredAnalysis,
   QuestionsOutput,
   RicardoListing,
   ListingValidation,

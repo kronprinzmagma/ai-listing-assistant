@@ -10,7 +10,7 @@ import {
 const validLocale = {
   title: 'Apple MacBook Pro 2020',
   description: 'Gut erhaltener Laptop',
-  category: 'Elektronik > Notebooks',
+  category: 'Laptops',
   condition: 'gut',
   price: 850,
   shipping: 'CHF 12 Schweizer Post',
@@ -27,6 +27,12 @@ describe('AnalysisResultSchema', () => {
     expect(() => AnalysisResultSchema.parse({
       object: 'L', condition: 'gut', category: 'E',
       titleDraft: 'A'.repeat(61), descriptionDraft: 'd',
+    })).toThrow()
+  })
+  it('rejects a category outside the fixed list', () => {
+    expect(() => AnalysisResultSchema.parse({
+      object: 'Laptop', condition: 'gut', category: 'Notebooks & Zubehör',
+      titleDraft: 'T', descriptionDraft: 'd',
     })).toThrow()
   })
   it('rejects invalid condition enum', () => {
@@ -50,18 +56,30 @@ describe('QuestionsOutputSchema', () => {
   })
 })
 
+const validFr = { ...validLocale, category: 'Ordinateurs portables' }
+
 describe('RicardoListingSchema', () => {
   it('accepts bilingual listing', () => {
-    expect(() => RicardoListingSchema.parse({ de: validLocale, fr: validLocale })).not.toThrow()
+    expect(() => RicardoListingSchema.parse({ de: validLocale, fr: validFr })).not.toThrow()
+  })
+  it('rejects a category outside the fixed list', () => {
+    expect(() => RicardoListingSchema.parse({
+      de: { ...validLocale, category: 'Elektronik > Notebooks' }, fr: validFr,
+    })).toThrow()
+  })
+  it('rejects FR category that does not match DE', () => {
+    expect(() => RicardoListingSchema.parse({
+      de: validLocale, fr: { ...validFr, category: 'Livres' },
+    })).toThrow()
   })
   it('rejects DE title >60 chars', () => {
     expect(() => RicardoListingSchema.parse({
-      de: { ...validLocale, title: 'A'.repeat(61) }, fr: validLocale,
+      de: { ...validLocale, title: 'A'.repeat(61) }, fr: validFr,
     })).toThrow()
   })
   it('rejects FR title >60 chars', () => {
     expect(() => RicardoListingSchema.parse({
-      de: validLocale, fr: { ...validLocale, title: 'A'.repeat(61) },
+      de: validLocale, fr: { ...validFr, title: 'A'.repeat(61) },
     })).toThrow()
   })
 })

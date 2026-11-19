@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { gradeCategory, CATEGORY_HIERARCHY } from './category-grader'
 import { CATEGORY_ID_MAP } from '../../src/lib/category-map'
+import { CATEGORIES } from '../../src/lib/categories'
 
 describe('gradeCategory', () => {
   it('Test 1: exact match returns score 1.0 with exactMatch=true', () => {
@@ -63,17 +64,14 @@ describe('gradeCategory', () => {
   })
 })
 
-describe('IN-01: CATEGORY_ID_MAP keys are reachable in CATEGORY_HIERARCHY', () => {
-  it('every key in CATEGORY_ID_MAP appears as a key or parent value in CATEGORY_HIERARCHY', () => {
-    const hierarchyKeys = new Set(Object.keys(CATEGORY_HIERARCHY))
-    const hierarchyParents = new Set(Object.values(CATEGORY_HIERARCHY))
-    const missing: string[] = []
-    for (const category of Object.keys(CATEGORY_ID_MAP)) {
-      if (!hierarchyKeys.has(category) && !hierarchyParents.has(category)) {
-        missing.push(category)
-      }
+describe('IN-01: Hierarchie und ID-Map kommen aus derselben festen Liste', () => {
+  it('jede Kategorie mit ID steht in der Liste, jede Oberkategorie ebenfalls', () => {
+    const labels = new Set<string>(CATEGORIES.map((c) => c.de))
+    expect(Object.keys(CATEGORY_ID_MAP).sort()).toEqual([...labels].sort())
+    for (const [child, parent] of Object.entries(CATEGORY_HIERARCHY)) {
+      expect(labels.has(child)).toBe(true)
+      expect(labels.has(parent)).toBe(true)
     }
-    expect(missing).toEqual([])
   })
 })
 
