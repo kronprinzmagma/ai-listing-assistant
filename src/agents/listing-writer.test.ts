@@ -6,7 +6,7 @@ vi.mock('@/lib/anthropic', () => ({
 }))
 
 import { runListingWriter } from './listing-writer'
-import { RicardoListingSchema } from './schemas'
+import { RicardoListingSchema, RicardoListingDraftSchema, shortenTitle } from './schemas'
 import type { AnalysisResult } from './schemas'
 
 const analysis: AnalysisResult = {
@@ -29,32 +29,55 @@ beforeEach(() => {
 })
 
 describe('runListingWriter', () => {
-  it('happy path: 2 calls (generate + validate, no correction)', async () => {
+  it('happy path: 1 call (generate; title check runs in code)', async () => {
     parseMock
       .mockResolvedValueOnce({ parsed_output: validListing, usage: { input_tokens: 100, output_tokens: 200 } })
-      .mockResolvedValueOnce({ parsed_output: { titleDeValid: true, titleFrValid: true, issues: [] }, usage: { input_tokens: 50, output_tokens: 10 } })
     const { output, trace } = await runListingWriter({ analysis, questions: [] })
     expect(RicardoListingSchema.safeParse(output).success).toBe(true)
     expect(output.de.title.length).toBeLessThanOrEqual(60)
     expect(output.fr.title.length).toBeLessThanOrEqual(60)
-    expect(parseMock).toHaveBeenCalledTimes(2)
+    expect(parseMock).toHaveBeenCalledTimes(1)
     expect(trace.agent).toBe('ListingWriter')
   })
 
-  it('self-corrects when validation reports invalid title (3 calls)', async () => {
+  it('self-corrects when the title is too long (2 calls, issue names the length)', async () => {
     parseMock
       .mockResolvedValueOnce({ parsed_output: longTitleListing, usage: { input_tokens: 100, output_tokens: 200 } })
-      .mockResolvedValueOnce({ parsed_output: { titleDeValid: false, titleFrValid: true, issues: ['DE title 75 chars > 60'] }, usage: { input_tokens: 50, output_tokens: 10 } })
       .mockResolvedValueOnce({ parsed_output: validListing, usage: { input_tokens: 80, output_tokens: 150 } })
+    const { output, trace } = await runListingWriter({ analysis, questions: [] })
+    expect(parseMock).toHaveBeenCalledTimes(2)
+    expect(JSON.stringify(parseMock.mock.calls[1][0].messages)).toContain('de.title hat 75 Zeichen, erlaubt sind 60')
+    expect(output.de.title).toBe(validListing.de.title)
+    expect(trace.inputTokens).toBe(180)
+  })
+
+  it('still too long after correction: cut at a word boundary, never throws', async () => {
+    const wordy = 'Apple MacBook Pro 13 Zoll 2020 M1 16GB RAM 512GB SSD Space Grau mit Ladekabel'
+    const stillLong = { de: { ...validListing.de, title: wordy }, fr: validListing.fr }
+    parseMock
+      .mockResolvedValueOnce({ parsed_output: stillLong, usage: { input_tokens: 1, output_tokens: 1 } })
+      .mockResolvedValueOnce({ parsed_output: stillLong, usage: { input_tokens: 1, output_tokens: 1 } })
     const { output } = await runListingWriter({ analysis, questions: [] })
-    expect(parseMock).toHaveBeenCalledTimes(3)
     expect(output.de.title.length).toBeLessThanOrEqual(60)
+    expect(wordy.startsWith(output.de.title)).toBe(true)
+    expect(wordy.charAt(output.de.title.length)).toBe(' ')
+    expect(RicardoListingSchema.safeParse(output).success).toBe(true)
+  })
+
+  it('model calls use a schema without maxLength (SDK would otherwise throw on >60)', async () => {
+    parseMock.mockResolvedValueOnce({ parsed_output: validListing, usage: { input_tokens: 1, output_tokens: 1 } })
+    await runListingWriter({ analysis, questions: [] })
+    const schema = JSON.stringify(parseMock.mock.calls[0][0].output_config.format.schema)
+    expect(schema).not.toContain('maxLength')
+    // Gegenprobe: das SDK-Format wirft bei 75 Zeichen nur mit dem strengen Schema
+    const { zodOutputFormat } = await import('@anthropic-ai/sdk/helpers/zod')
+    expect(() => zodOutputFormat(RicardoListingSchema).parse(JSON.stringify(longTitleListing))).toThrow()
+    expect(() => zodOutputFormat(RicardoListingDraftSchema).parse(JSON.stringify(longTitleListing))).not.toThrow()
   })
 
   it('passes answered questions into the prompt as F:/A: pairs', async () => {
     parseMock
       .mockResolvedValueOnce({ parsed_output: validListing, usage: { input_tokens: 1, output_tokens: 1 } })
-      .mockResolvedValueOnce({ parsed_output: { titleDeValid: true, titleFrValid: true, issues: [] }, usage: { input_tokens: 1, output_tokens: 1 } })
     await runListingWriter({
       analysis,
       questions: [{ id: 'q1', text: 'Alter?', answer: '5 Jahre' }, { id: 'q2', text: 'Marke?' }],
@@ -65,19 +88,16 @@ describe('runListingWriter', () => {
     expect(firstCallContent).not.toContain('Marke?\nA:') // unanswered questions not included
   })
 
-  it('uses zodOutputFormat on generation and validation calls', async () => {
+  it('uses zodOutputFormat on the generation call', async () => {
     parseMock
       .mockResolvedValueOnce({ parsed_output: validListing, usage: { input_tokens: 1, output_tokens: 1 } })
-      .mockResolvedValueOnce({ parsed_output: { titleDeValid: true, titleFrValid: true, issues: [] }, usage: { input_tokens: 1, output_tokens: 1 } })
     await runListingWriter({ analysis, questions: [] })
     expect(parseMock.mock.calls[0][0].output_config).toBeDefined()
-    expect(parseMock.mock.calls[1][0].output_config).toBeDefined()
   })
 
   it('uses promptOverride instead of built-in prompt when provided', async () => {
     parseMock
       .mockResolvedValueOnce({ parsed_output: validListing, usage: { input_tokens: 1, output_tokens: 1 } })
-      .mockResolvedValueOnce({ parsed_output: { titleDeValid: true, titleFrValid: true, issues: [] }, usage: { input_tokens: 1, output_tokens: 1 } })
     const customPrompt = 'Custom prompt with {{object}} and {{condition}}'
     await runListingWriter({ analysis, questions: [], promptOverride: customPrompt })
     const firstCallContent = JSON.stringify(parseMock.mock.calls[0][0].messages)
@@ -91,10 +111,23 @@ describe('runListingWriter', () => {
   it('falls back to built-in prompt when promptOverride is not set', async () => {
     parseMock
       .mockResolvedValueOnce({ parsed_output: validListing, usage: { input_tokens: 1, output_tokens: 1 } })
-      .mockResolvedValueOnce({ parsed_output: { titleDeValid: true, titleFrValid: true, issues: [] }, usage: { input_tokens: 1, output_tokens: 1 } })
     await runListingWriter({ analysis, questions: [] })
     const firstCallContent = JSON.stringify(parseMock.mock.calls[0][0].messages)
     // Built-in prompt should be used
     expect(firstCallContent).toContain('Erstelle ein vollständiges Inserat')
+  })
+})
+
+describe('shortenTitle', () => {
+  it('leaves short titles unchanged', () => {
+    expect(shortenTitle('Velo Damen 28 Zoll')).toBe('Velo Damen 28 Zoll')
+  })
+  it('cuts at the last word boundary and strips trailing separators', () => {
+    const t = shortenTitle('Gartenstuhl Holz klappbar, 4 Stück, wetterfest lackiert - Abholung Zürich Kreis 4')
+    expect(t.length).toBeLessThanOrEqual(60)
+    expect(t).toBe('Gartenstuhl Holz klappbar, 4 Stück, wetterfest lackiert')
+  })
+  it('hard-cuts a single overlong word', () => {
+    expect(shortenTitle('X'.repeat(80))).toHaveLength(60)
   })
 })

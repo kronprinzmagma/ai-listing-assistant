@@ -1,7 +1,7 @@
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import sharp from 'sharp'
 import { anthropic } from '@/lib/anthropic'
-import { AnalysisResultSchema, type AnalysisResult } from './schemas'
+import { AnalysisDraftSchema, AnalysisResultSchema, shortenTitle, type AnalysisResult } from './schemas'
 import type { AgentTraceEntry } from '@/types/session'
 
 const MODEL = 'claude-sonnet-4-6'
@@ -54,11 +54,13 @@ export async function runImageAnalyzer(
         ],
       },
     ],
-    output_config: { format: zodOutputFormat(AnalysisResultSchema) },
+    output_config: { format: zodOutputFormat(AnalysisDraftSchema) },
   })
 
-  const output = message.parsed_output
-  if (!output) throw new Error('ImageAnalyzer: structured output was null (model may have refused or truncated)')
+  const draft = message.parsed_output
+  if (!draft) throw new Error('ImageAnalyzer: structured output was null (model may have refused or truncated)')
+  // Ein zu langer Titel-Entwurf wird gekuerzt statt die Analyse abzubrechen.
+  const output: AnalysisResult = AnalysisResultSchema.parse({ ...draft, titleDraft: shortenTitle(draft.titleDraft) })
 
   return {
     output,

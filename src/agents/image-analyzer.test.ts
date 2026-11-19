@@ -36,6 +36,20 @@ beforeEach(() => {
 })
 
 describe('runImageAnalyzer', () => {
+  it('shortens an overlong titleDraft instead of failing the analysis', async () => {
+    parseMock.mockResolvedValueOnce({
+      parsed_output: {
+        object: 'Laptop', condition: 'gut', category: 'Elektronik',
+        titleDraft: 'Apple MacBook Pro 13 Zoll 2020 M1 16GB RAM 512GB SSD Space Grau mit Ladekabel',
+        descriptionDraft: 'Gut.',
+      },
+      usage: { input_tokens: 1, output_tokens: 1 },
+    })
+    const { output } = await runImageAnalyzer({ photoPaths: ['/fake/x.jpg'] })
+    expect(output.titleDraft.length).toBeLessThanOrEqual(60)
+    expect(AnalysisResultSchema.safeParse(output).success).toBe(true)
+  })
+
   it('returns typed AnalysisResult + trace', async () => {
     const { output, trace } = await runImageAnalyzer({ photoPaths: ['/fake/x.jpg'] })
     expect(AnalysisResultSchema.safeParse(output).success).toBe(true)

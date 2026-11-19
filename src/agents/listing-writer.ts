@@ -2,8 +2,12 @@ import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { anthropic } from '@/lib/anthropic'
 import {
   RicardoListingSchema,
-  ListingValidationSchema,
+  RicardoListingDraftSchema,
+  MAX_TITLE_LENGTH,
+  shortenTitle,
+  type ListingValidation,
   type RicardoListing,
+  type RicardoListingDraft,
   type AnalysisResult,
 } from './schemas'
 import type { AgentTraceEntry, Question } from '@/types/session'
@@ -51,29 +55,31 @@ async function generateCall(prompt: string) {
     model: MODEL,
     max_tokens: 2048,
     messages: [{ role: 'user', content: prompt }],
-    output_config: { format: zodOutputFormat(RicardoListingSchema) },
+    output_config: { format: zodOutputFormat(RicardoListingDraftSchema) },
   })
 }
 
-async function validateCall(listing: RicardoListing) {
-  return anthropic.messages.parse({
-    model: MODEL,
-    max_tokens: 256,
-    messages: [{
-      role: 'user',
-      content: `Prüfe dieses Inserat. Gib zurück, ob de.title und fr.title jeweils max. 60 Zeichen lang sind und liste konkrete Probleme.\n\nInserat:\n${JSON.stringify(listing)}`,
-    }],
-    output_config: { format: zodOutputFormat(ListingValidationSchema) },
-  })
+/** PIPE-10: Titellaenge im Code pruefen statt per zweitem Modellaufruf. */
+export function validateTitles(listing: RicardoListingDraft): ListingValidation {
+  const issues: string[] = []
+  for (const lang of ['de', 'fr'] as const) {
+    const len = listing[lang].title.trim().length
+    if (len > MAX_TITLE_LENGTH) issues.push(`${lang}.title hat ${len} Zeichen, erlaubt sind ${MAX_TITLE_LENGTH}`)
+  }
+  return {
+    titleDeValid: listing.de.title.trim().length <= MAX_TITLE_LENGTH,
+    titleFrValid: listing.fr.title.trim().length <= MAX_TITLE_LENGTH,
+    issues,
+  }
 }
 
-async function correctCall(prompt: string, prior: RicardoListing, issues: string[]) {
+async function correctCall(prompt: string, prior: RicardoListingDraft, issues: string[]) {
   const correctionPrompt = `${prompt}\n\nVorheriger Entwurf hatte Probleme. Bitte korrigieren:\n${issues.map(i => `- ${i}`).join('\n')}\n\nVorheriger Entwurf:\n${JSON.stringify(prior)}`
   return anthropic.messages.parse({
     model: MODEL,
     max_tokens: 2048,
     messages: [{ role: 'user', content: correctionPrompt }],
-    output_config: { format: zodOutputFormat(RicardoListingSchema) },
+    output_config: { format: zodOutputFormat(RicardoListingDraftSchema) },
   })
 }
 
@@ -93,28 +99,27 @@ export async function runListingWriter(
   const genMessage = await generateCall(generationPrompt)
   const genOutput = genMessage.parsed_output
   if (!genOutput) throw new Error('ListingWriter: generation call returned null structured output (model may have refused or truncated)')
-  let output = genOutput
+  let draft: RicardoListingDraft = genOutput
   let totalInputTokens = genMessage.usage?.input_tokens ?? 0
   let totalOutputTokens = genMessage.usage?.output_tokens ?? 0
 
-  // PIPE-10: self-validate
-  const valMessage = await validateCall(output)
-  totalInputTokens += valMessage.usage?.input_tokens ?? 0
-  totalOutputTokens += valMessage.usage?.output_tokens ?? 0
-  const validation = valMessage.parsed_output
-  if (!validation) throw new Error('ListingWriter: validation call returned null structured output')
+  // PIPE-10: self-validate (deterministisch, kein zusaetzlicher Modellaufruf)
+  const validation = validateTitles(draft)
 
   if (!validation.titleDeValid || !validation.titleFrValid) {
-    const corrMessage = await correctCall(generationPrompt, output, validation.issues)
+    const corrMessage = await correctCall(generationPrompt, draft, validation.issues)
     const corrected = corrMessage.parsed_output
     if (!corrected) throw new Error('ListingWriter: correction call returned null structured output')
     totalInputTokens += corrMessage.usage?.input_tokens ?? 0
     totalOutputTokens += corrMessage.usage?.output_tokens ?? 0
-    // Hard-enforce title length in code, not just via LLM validation
-    if (corrected.de.title.length > 60) corrected.de.title = corrected.de.title.slice(0, 60)
-    if (corrected.fr.title.length > 60) corrected.fr.title = corrected.fr.title.slice(0, 60)
-    output = corrected
+    draft = corrected
   }
+
+  // Hard-enforce title length in code: letzte Rueckfallebene, an einer Wortgrenze
+  const output: RicardoListing = RicardoListingSchema.parse({
+    de: { ...draft.de, title: shortenTitle(draft.de.title) },
+    fr: { ...draft.fr, title: shortenTitle(draft.fr.title) },
+  })
 
   return {
     output,

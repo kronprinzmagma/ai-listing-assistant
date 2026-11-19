@@ -4,7 +4,7 @@
  * Pipeline order (matches /api/* route invocation):
  *   1. ImageAnalyzer    — photos → AnalysisResult (object, condition, category, draft title + description)
  *   2. QuestionGenerator — analysis → 3-5 Question[] (only about non-visible info)
- *   3. ListingWriter     — analysis + answers → RicardoListing (DE + FR, title ≤ 60 chars, with PIPE-10 self-validation)
+ *   3. ListingWriter     — analysis + answers → RicardoListing (DE + FR, title ≤ 60 chars, with PIPE-10 title check in code)
  *   4. PriceEstimator    — analysis → PriceEstimate (CHF + confidence + rationale)
  *
  * Steps 3 and 4 (ListingWriter + PriceEstimator) run in parallel in /api/generate.
@@ -32,6 +32,7 @@ export {
   RicardoListingSchema,
   PriceEstimateSchema,
   ListingValidationSchema,
+  shortenTitle,
 } from './schemas'
 export type {
   AnalysisResult,
