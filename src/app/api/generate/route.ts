@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateSessionId, readSession, writeSession } from '@/lib/session'
 import { runListingWriter } from '@/agents/listing-writer'
 import { runPriceEstimator } from '@/agents/price-estimator'
+import type { PriceEstimateZ, RicardoListing } from '@/agents/schemas'
+
+function withEstimatedPrice(listing: RicardoListing, estimate: PriceEstimateZ): RicardoListing {
+  if (estimate.source !== 'ricardo') return listing
+  const price = estimate.suggestedPriceCHF
+  return { de: { ...listing.de, price }, fr: { ...listing.fr, price } }
+}
 
 export async function POST(req: NextRequest) {
   const { sessionId } = (await req.json()) as { sessionId: string }
@@ -37,7 +44,10 @@ export async function POST(req: NextRequest) {
       runPriceEstimator({ analysis: session.analysis }),
     ])
 
-    session.listing = listingResult.output
+    // Stuetzt sich der Preisvorschlag auf Ricardo-Vergleichsangebote, gilt er
+    // fuer das Inserat (DE und FR); sonst bleibt der Preis des Schreibers.
+    const listing = withEstimatedPrice(listingResult.output, priceResult.output)
+    session.listing = listing
     session.priceEstimate = priceResult.output
     session.agentTrace = [
       ...(session.agentTrace ?? []),
@@ -47,7 +57,7 @@ export async function POST(req: NextRequest) {
     await writeSession(session)
 
     return NextResponse.json({
-      listing: listingResult.output,
+      listing,
       priceEstimate: priceResult.output,
     })
   } catch (err) {

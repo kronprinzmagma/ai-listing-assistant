@@ -77,12 +77,36 @@ export function shortenTitle(title: string, max = MAX_TITLE_LENGTH): string {
 }
 
 // PriceEstimator output
+// Ein Vergleichsangebot von ricardo.ch aus einem Suchtreffer der Claude-Websuche.
+// Link und Preis liest der Code aus Titel und URL des Treffers (price-estimator.ts).
+export const ComparableSchema = z.object({
+  title: z.string().min(1),
+  url: z.string().regex(/^https:\/\/www\.ricardo\.ch\//),
+  priceCHF: z.number().positive(),
+  pageAge: z.string().nullable(),
+})
+export type Comparable = z.infer<typeof ComparableSchema>
+
 export const PriceEstimateSchema = z.object({
   suggestedPriceCHF: z.number().nonnegative(),
   confidence: z.enum(['low', 'medium', 'high']),
   rationale: z.string().min(1),
+  // 'ricardo': gestuetzt auf Vergleichsangebote; 'modell': nur Modellwissen.
+  // Optional, weil aeltere Sessions beides nicht kennen.
+  source: z.enum(['ricardo', 'modell']).optional(),
+  comparables: z.array(ComparableSchema).optional(),
 })
 export type PriceEstimateZ = z.infer<typeof PriceEstimateSchema>
+
+// Antwortschema fuer den Preisentscheid des Modells: es waehlt die passenden
+// Angebote per Nummer aus; Links und Preise kommen nie vom Modell.
+export const PriceDecisionSchema = z.object({
+  comparableIndices: z.array(z.number().int()),
+  suggestedPriceCHF: z.number().nonnegative(),
+  confidence: z.enum(['low', 'medium', 'high']),
+  rationale: z.string().min(1),
+})
+export type PriceDecision = z.infer<typeof PriceDecisionSchema>
 
 // ListingWriter self-validation (PIPE-10). Wird seit 2026-11-19 im Code berechnet
 // (validateTitles in listing-writer.ts), nicht mehr per zweitem Modellaufruf.

@@ -3,8 +3,38 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { Listing, ListingLocale } from '@/types/session'
+import { Listing, ListingLocale, PriceEstimate } from '@/types/session'
 import { CATEGORIES, categoryDeFromFr, categoryFr, isCategoryDe } from '@/lib/categories'
+
+const CONFIDENCE_DE = { low: 'tief', medium: 'mittel', high: 'hoch' } as const
+
+/** Preisvorschlag mit Herkunft: Vergleichsangebote von ricardo.ch oder nur Modellschaetzung. */
+function PriceInfo({ estimate }: { estimate: PriceEstimate }) {
+  const comparables = estimate.comparables ?? []
+  return (
+    <div className="card">
+      <h2 style={{ marginTop: 0 }}>Preisvorschlag: CHF {estimate.suggestedPriceCHF}</h2>
+      <p>
+        {estimate.source === 'ricardo'
+          ? `Gestützt auf ${comparables.length} Vergleichsangebot${comparables.length === 1 ? '' : 'e'} von ricardo.ch, als Preis ins Inserat übernommen.`
+          : 'Schätzung ohne passende Vergleichsangebote (nur Modellwissen). Preis bitte selbst prüfen.'}{' '}
+        Sicherheit: {CONFIDENCE_DE[estimate.confidence]}.
+      </p>
+      <p>{estimate.rationale}</p>
+      {comparables.length > 0 && (
+        <ul>
+          {comparables.map((c) => (
+            <li key={c.url}>
+              CHF {c.priceCHF} –{' '}
+              <a href={c.url} target="_blank" rel="noopener noreferrer">{c.title}</a>
+              {c.pageAge ? ` (Stand: ${c.pageAge})` : ''}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
 
 const CONDITIONS_DE = ['neu', 'wie neu', 'gut', 'akzeptabel']
 const CONDITIONS_FR = ['neuf', 'comme neuf', 'bon état', 'acceptable']
@@ -113,6 +143,7 @@ export default function ReviewPage() {
   const [publishing, setPublishing] = useState(false)
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null)
   const [publishError, setPublishError] = useState('')
+  const [priceEstimate, setPriceEstimate] = useState<PriceEstimate | null>(null)
 
   useEffect(() => {
     fetch(`/api/listing?sessionId=${sessionId}`)
@@ -121,6 +152,7 @@ export default function ReviewPage() {
         if (data.session?.listing) setListing(data.session.listing)
         if (data.session?.approved) setApproved(data.session.approved)
         if (data.session?.publishedUrl) setPublishedUrl(data.session.publishedUrl)
+        if (data.session?.priceEstimate) setPriceEstimate(data.session.priceEstimate)
       })
       .catch(() => setError('Inserat konnte nicht geladen werden.'))
   }, [sessionId])
@@ -272,6 +304,8 @@ export default function ReviewPage() {
               onCategoryChange={handleCategoryChange}
             />
           </div>
+
+          {priceEstimate && <PriceInfo estimate={priceEstimate} />}
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button

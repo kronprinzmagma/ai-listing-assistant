@@ -30,11 +30,9 @@ export interface AgentTraceEntry {
   outputTokens?: number
 }
 
-export interface PriceEstimate {
-  suggestedPriceCHF: number
-  confidence: 'low' | 'medium' | 'high'
-  rationale: string
-}
+// Gleiche Form wie PriceEstimateSchema (src/agents/schemas.ts).
+import type { PriceEstimateZ as PriceEstimate, Comparable } from '@/agents/schemas'
+export type { PriceEstimate, Comparable }
 
 export interface SessionState {
   id: string
