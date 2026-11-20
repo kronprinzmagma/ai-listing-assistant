@@ -268,7 +268,7 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 | ImageAnalyzer agent | Resize photos with sharp, send to Claude, parse AnalysisResult | `src/agents/image-analyzer.ts` |
 | QuestionGenerator agent | Send AnalysisResult to Claude, parse Question[] | `src/agents/question-generator.ts` |
 | ListingWriter agent | Send AnalysisResult + answered questions to Claude, parse RicardoListing (DE + FR) | `src/agents/listing-writer.ts` |
-| PriceEstimator agent | Send AnalysisResult to Claude, parse PriceEstimate (CHF) | `src/agents/price-estimator.ts` |
+| PriceEstimator agent | Look up comparable ricardo.ch offers via Claude web search, read link and price in code, let Claude pick matches; fallback: model-only PriceEstimate (CHF, `source: 'modell'`) | `src/agents/price-estimator.ts` |
 | RicardoPublisher agent | Push approved listing to Ricardo.ch via the MCP integration | `src/agents/ricardo-publisher.ts` |
 | SessionState | Authoritative session shape, all step outputs nested inside | `src/types/session.ts` |
 ## Pattern Overview

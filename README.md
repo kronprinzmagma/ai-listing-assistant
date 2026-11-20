@@ -14,7 +14,7 @@
 
 ## What it does
 
-Upload 1–5 photos of any item you want to sell. The assistant runs an agentic pipeline: image analysis extracts object, condition, and category; a question generator asks only what the photos cannot answer; a listing writer produces a complete, bilingual (DE/FR) Ricardo.ch listing with title, description, price estimate, and shipping conditions; after your review, a publisher hands it to the Ricardo.ch client (a stub for now, see status). You get a listing ready to publish without writing the copy yourself.
+Upload 1–5 photos of any item you want to sell. The assistant runs an agentic pipeline: image analysis extracts object, condition, and category; a question generator asks only what the photos cannot answer; a listing writer produces a complete, bilingual (DE/FR) Ricardo.ch listing with title, description, price, and shipping conditions, while a price estimator looks up comparable offers on ricardo.ch and replaces the price with one backed by those offers where it finds matches; after your review, a publisher hands it to the Ricardo.ch client (a stub for now, see status). You get a listing ready to publish without writing the copy yourself.
 
 Built as an applied AI engineering case: typed agent contracts (Zod), a ListingWriter that corrects its own validation errors, LLM-as-judge evals across three prompt versions, and per-agent tracing via `agentTrace`. It also ships a standalone, publish-ready MCP server package. Each concept maps to inspectable source code.
 
@@ -26,7 +26,7 @@ flowchart TD
     ImageAnalyzer --> QuestionGenerator[QuestionGenerator agent\nsrc/agents/question-generator.ts]
     QuestionGenerator --> UserAnswers[User answers\n3-5 questions]
     UserAnswers --> ListingWriter[ListingWriter agent\nsrc/agents/listing-writer.ts]
-    UserAnswers --> PriceEstimator[PriceEstimator agent\nsrc/agents/price-estimator.ts]
+    UserAnswers --> PriceEstimator[PriceEstimator agent\ncomparable ricardo.ch offers via web search\nsrc/agents/price-estimator.ts]
     ListingWriter -->|one correction pass\non validation error| ListingWriter
     ListingWriter --> Review[Review UI\nall fields editable]
     PriceEstimator --> Review
@@ -62,6 +62,7 @@ Detailed component descriptions: [docs/architecture.md](docs/architecture.md)
 | Agentic pipeline | `src/agents/` | Five typed agents with defined inputs/outputs replace a single monolithic prompt; each agent has one responsibility and can be tested in isolation |
 | Structured outputs (Zod) | `src/agents/schemas.ts`, all agent files | `zodOutputFormat` (`output_config.format`) enforces JSON contracts at the SDK layer; no manual JSON parsing or regex extraction in agent code |
 | Self-correcting agent | `src/agents/listing-writer.ts` | If the output fails `ListingValidationSchema`, the ListingWriter gets the error back for one correction pass; a title that is still too long is then cut to 60 characters |
+| Grounded price | `src/agents/price-estimator.ts` | The price comes from comparable offers found with the Claude API web search tool (restricted to ricardo.ch); link and price of each result are read in code, Claude only picks the matching ones, and the review shows the links. Without matches it falls back to a model-only estimate marked as such |
 | Observability (agentTrace) | `src/types/session.ts` | Every agent call appends a structured `AgentTraceEntry` (model, tokens, duration, input/output) to `SessionState.agentTrace`; a whole run can be replayed from one JSON file |
 | LLM-as-judge evals | `evals/graders/` | Title and description graders use Claude to score outputs against multi-criterion rubrics; the category grader is deterministic |
 | Prompt comparison | `evals/run-eval.ts`, `evals/prompts/` | Three prompt versions run against 10 fixed test cases; results are committed including failures (EVAL-07), progression in `evals/results/progression.md` |
