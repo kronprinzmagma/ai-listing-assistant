@@ -136,7 +136,7 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - TSX - React components in `src/app/**/*.tsx`
 - None detected
 ## Runtime
-- Node.js v22.20.0 (no `.nvmrc` pinning — runtime version inferred from environment)
+- Node.js 26 (LTS) in CI; locally also runs on Node 22 (no `.nvmrc` pinning)
 - npm
 - Lockfile: `package-lock.json` (present)
 ## Frameworks
@@ -161,7 +161,7 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - `tsconfig.json` - Strict mode, path alias `@/*` → `./src/*`, target ES2017
 - `@/*` resolves to `./src/*` — used throughout all source files
 ## Platform Requirements
-- Node.js 22.x
+- Node.js 26.x (CI), 22.x still works locally
 - `ANTHROPIC_API_KEY` set in `.env.local`
 - Local filesystem write access (for `uploads/` and `sessions/` directories)
 - Single-server deployment assumed (session state is filesystem-based, not suitable for multi-instance)
