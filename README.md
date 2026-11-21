@@ -67,6 +67,7 @@ Detailed component descriptions: [docs/architecture.md](docs/architecture.md)
 | LLM-as-judge evals | `evals/graders/` | Title and description graders use Claude to score outputs against multi-criterion rubrics; the category grader is deterministic |
 | Prompt comparison | `evals/run-eval.ts`, `evals/prompts/` | Three prompt versions run against 10 fixed test cases; results are committed including failures (EVAL-07), progression in `evals/results/progression.md` |
 | MCP server | `packages/ricardo-mcp/` | Standalone package that exposes Ricardo.ch operations as MCP tools and read-only resources; ready for `npm publish`, not yet published. The RicardoPublisher uses the package's client directly |
+| Prompt-injection evals | `evals/redteam/`, `src/lib/models.ts` | 12 fixed injection cases (2 with a synthetic photo) run through the real agent pipeline with deterministic checks (`npm run eval:injection`); the system note `DATA_GUARD_SYSTEM` tells the agents to treat text from photos and answers as data, not instructions |
 | Defense-in-depth security | `src/lib/sanitize.ts`, `src/lib/session.ts`, `.husky/pre-commit` | Session ID validated against path traversal; user answers sanitized against prompt injection; secretlint pre-commit hook blocks credential leaks |
 
 ## Setup
@@ -115,6 +116,8 @@ Measured on 2026-05-21 with `evals/run-eval.ts`, one run per version, 10 cases. 
 
 Status of this table: MEASURED (sources linked per row). promptfoo run in CI: UNMEASURED, first run pending.
 
+The agents now run on Claude Sonnet 5.5 (`src/lib/models.ts`). The before/after runs of the model switch on 2026-11-19 (same 10 cases, graders still on Sonnet 4.6, one run per version) and the injection-eval result are in the section "Modellwechsel Sonnet 4.6 → Sonnet 5.5" of [`evals/results/progression.md`](evals/results/progression.md); run JSONs: `evals/results/run-sonnet55-v*-2026-11-19*.json`.
+
 Full score breakdown and honest notes on regressions: [`evals/results/progression.md`](evals/results/progression.md)
 
 Eval methodology and grader rubrics: [`docs/eval-report.md`](docs/eval-report.md)
@@ -146,7 +149,8 @@ src/
   agents/          # Five typed AI agents (image-analyzer, question-generator,
                    # listing-writer, price-estimator, ricardo-publisher) + schemas
   app/             # Next.js App Router: 5 wizard pages, an orders page, 8 API routes
-  lib/             # Business logic: session persistence, sanitize, anthropic client
+  lib/             # Session persistence, sanitize, anthropic client, model config
+                   # (models.ts), fixed category list, partner-token store
   types/           # SessionState, AnalysisResult, Listing, AgentTraceEntry, ...
 packages/
   ricardo-mcp/     # Standalone, publish-ready MCP server package for Ricardo.ch API integration
@@ -155,6 +159,7 @@ evals/
   graders/         # LLM-as-judge graders: title, description, category
   prompts/         # Versioned listing prompts (v1, v2, v3)
   promptfoo/       # Test loader and assertions for promptfooconfig.yaml
+  redteam/         # Prompt-injection cases and deterministic checks (promptfoo)
   results/         # Committed run JSONs + progression.md score table
 docs/
   architecture.md  # Detailed system diagram + component responsibilities
@@ -168,7 +173,7 @@ docs/
 - **@anthropic-ai/sdk**: Claude Sonnet 5.5 for all agent calls (graders: Sonnet 4.6); `zodOutputFormat` for structured outputs
 - **Zod**: Agent output schemas and validation contracts
 - **sharp**: Server-side image resizing before API calls
-- **Vitest**: Unit tests for agents and graders
+- **Vitest**: Unit tests for agents, API routes, lib modules and graders
 - **promptfoo**: side-by-side eval of the prompt versions (`evals/promptfooconfig.yaml`); `evals/run-eval.ts` writes the committed run JSONs
 - **MCP SDK** (`@modelcontextprotocol/sdk`): Ricardo.ch tool server in `packages/ricardo-mcp`
 

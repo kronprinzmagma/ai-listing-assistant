@@ -80,8 +80,9 @@ flowchart TD
 | ListingWriter | `src/agents/listing-writer.ts` | Generates a complete bilingual (DE/FR) Ricardo.ch listing; on a `ListingValidationSchema` failure one correction pass, then a hard title cut at 60 characters (PIPE-10) |
 | PriceEstimator | `src/agents/price-estimator.ts` | Looks up comparable offers on ricardo.ch via the Claude API web search tool (search index only, `allowed_domains: ricardo.ch`, no page fetch), reads link and price from each result in code, lets Claude pick the matching ones by number and checks the suggestion against their prices; without matches it falls back to a model-only estimate marked `source: 'modell'`. The review shows price, rationale and links; a comparable-based price replaces the writer's price |
 | RicardoPublisher | `src/agents/ricardo-publisher.ts` | Calls the Ricardo.ch client from `packages/ricardo-mcp` (a stub until partner API access) and stores `publishedListingId` and `publishedUrl` in the session |
-| Agent orchestrator | `src/agents/index.ts` | Re-exports all agent entry points; documents pipeline order and parallelism (ListingWriter + PriceEstimator run in parallel in /api/generate) |
+| Agent orchestrator | `src/agents/index.ts` | Re-exports the entry points of the four Claude agents (the RicardoPublisher is imported directly by `/api/publish`); documents pipeline order and parallelism (ListingWriter + PriceEstimator run in parallel in /api/generate) |
 | Agent schemas | `src/agents/schemas.ts` | Zod schemas for all agent inputs and outputs; `zodOutputFormat` contracts enforced at SDK layer |
+| Model config | `src/lib/models.ts` | One place for model ID (`claude-sonnet-5-5`) and `effort: low` of all Claude agents, plus the system note `DATA_GUARD_SYSTEM` against instructions hidden in photo or answer text |
 
 ## Data flow: session state accumulation
 
@@ -93,7 +94,7 @@ flowchart TD
 | Answers | `questions[].answer` populated | User answers pass through `src/lib/sanitize.ts` (`sanitizeUserAnswer`) before being written to the session; prompt injection mitigation (REPO-06) |
 | Generate | `listing` (`Listing`), `priceEstimate` (`PriceEstimate`) | ListingWriter and PriceEstimator run in parallel; `agentTrace[2]` and `agentTrace[3]` appended |
 | Approve | `approved: true` | Set via PATCH /api/listing when user clicks the approval button in Review UI |
-| Publish | `publishedListingId`, `publishedUrl` | Set after successful Ricardo.ch MCP call; idempotency guard prevents double-publish |
+| Publish | `publishedListingId`, `publishedUrl` | Set after the Ricardo client from `packages/ricardo-mcp` (stub) returns; `agentTrace` entry appended; idempotency guard prevents double-publish |
 
 ## Three-component system
 

@@ -45,9 +45,12 @@ Fertig wenn: Alle Felder übersichtlich dargestellt, einzeln editierbar, Freigab
 
 ```bash
 npm install
-echo "ANTHROPIC_API_KEY=sk-ant-..." > .env.local
+cp .env.example .env.local
+# .env.local: ANTHROPIC_API_KEY setzen; RICARDO_PARTNERSHIP_KEY/_PASSWORD bleiben bis zum Partner-API-Zugang leer (Stub)
 npm run dev
 ```
+
+Tests: `npm test` (Vitest). Evals: `npm run eval:v1|v2|v3`, `npm run eval:injection` (brauchen `ANTHROPIC_API_KEY`).
 
 Öffne http://localhost:3000.
 
@@ -62,6 +65,7 @@ src/
       questions/page.tsx              # Schritt 3: Rückfragen
       listing/page.tsx                # Schritt 4: Generierung
       review/page.tsx                 # Schritt 5: Review
+      orders/page.tsx                 # Bestellungen (Stub-Daten)
     api/
       upload/route.ts                 # POST: Fotos speichern, Session anlegen
       analyze/route.ts                # POST: Claude Bildanalyse
@@ -69,32 +73,43 @@ src/
       answers/route.ts                # POST: Antworten speichern
       generate/route.ts               # POST: Inserat generieren
       listing/route.ts                # GET/PATCH: Inserat lesen/speichern
+      publish/route.ts                # POST: freigegebenes Inserat publizieren (Stub)
+      orders/route.ts                 # GET: Bestellungen
   lib/
     session.ts                        # createSession / readSession / writeSession
     anthropic.ts                      # Anthropic-Client
     sanitize.ts                       # Eingabe-Bereinigung gegen Prompt-Injection
+    models.ts                         # Modell-ID, effort und DATA_GUARD_SYSTEM aller Agents
+    categories.ts                     # feste Kategorienliste (23 Einträge)
+    category-map.ts                   # Kategorie → Ricardo-Kategorie-ID (Platzhalter)
+    token-store.ts                    # Partner-Token pro Session (im Speicher)
   agents/                             # Fünf typisierte, zustandslose Agents (input → { output, trace })
     image-analyzer.ts                 # ImageAnalyzer: Fotos → AnalysisResult
     question-generator.ts             # QuestionGenerator: Analyse → Rückfragen
     listing-writer.ts                 # ListingWriter: Analyse + Antworten → Inserat (DE + FR)
     price-estimator.ts                # PriceEstimator: Analyse → Preisschätzung (CHF)
-    ricardo-publisher.ts              # RicardoPublisher: Inserat → Ricardo.ch via MCP
+    ricardo-publisher.ts              # RicardoPublisher: Inserat → RicardoClient aus packages/ricardo-mcp (Stub)
     schemas.ts                        # Zod-Schemas für alle Agent-Ein- und -Ausgaben
   types/
     session.ts                        # SessionState, AnalysisResult, Listing, ...
+packages/ricardo-mcp/                 # MCP-Server-Paket mit RicardoClient (Stub)
+evals/                                # Qualitäts-Evals (run-eval.ts, promptfoo) und Injection-Evals (redteam/)
 uploads/                              # gitignored, runtime
 sessions/                             # gitignored, runtime
 ```
 
-## Implementierungsstatus (Stand 2026-03-21)
+## Implementierungsstatus (Stand 2026-11-21)
 
 | Schritt | Code | Getestet |
 |---|---|---|
-| 1 – Foto-Upload | ✓ | ✓ (curl-Test, Datei + Session-JSON korrekt) |
-| 2 – KI-Bildanalyse | ✓ | offen (API-Key in .env.local fehlt noch) |
-| 3 – Rückfragen-Flow | ✓ | offen |
-| 4 – Inserat-Generierung | ✓ | offen |
-| 5 – Review | ✓ | offen |
+| 1 – Foto-Upload | ✓ | kein Route-Test (`src/app/api/upload/`) |
+| 2 – KI-Bildanalyse | ✓ | Vitest (`image-analyzer.test.ts`, `api/analyze/route.test.ts`) |
+| 3 – Rückfragen-Flow | ✓ | Vitest (`question-generator.test.ts`, `api/questions`, `api/answers`) |
+| 4 – Inserat-Generierung | ✓ | Vitest (`listing-writer.test.ts`, `price-estimator.test.ts`, `api/generate`); Evals in `evals/` |
+| 5 – Review | ✓ | kein Route-Test (`src/app/api/listing/`) |
+| Publizieren | ✓ gegen Stub | Vitest (`ricardo-publisher.test.ts`, `api/publish`, `api/orders`) |
+
+Die Publikation läuft gegen den Stub-Client aus `packages/ricardo-mcp`, bis Partner-API-Zugang besteht.
 
 ## v1 – Akzeptanzkriterien für Claude Code
 
@@ -132,7 +147,7 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 ## Technology Stack
 
 ## Languages
-- TypeScript 5.x - All source code in `src/`
+- TypeScript 6.0 - All source code in `src/`
 - TSX - React components in `src/app/**/*.tsx`
 - None detected
 ## Runtime
@@ -140,19 +155,21 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - npm
 - Lockfile: `package-lock.json` (present)
 ## Frameworks
-- Next.js 16.2.1 - Full-stack React framework, App Router (`src/app/`)
-- React 19.2.4 - UI rendering
-- React DOM 19.2.4 - DOM bindings
-- Not detected — no test framework configured
+- Next.js 16.4.6 - Full-stack React framework, App Router (`src/app/`)
+- React 19.3.1 - UI rendering
+- React DOM 19.3.1 - DOM bindings
+- Vitest 5.1.1 - Unit tests (`vitest.config.ts`: `src/**/*.test.ts`, `evals/**/*.test.ts`)
+- promptfoo 0.125.1 - Quality and injection evals (`evals/promptfooconfig.yaml`, `evals/redteam/`)
 - `next dev` - Development server
 - `next build` - Production build
 - `next start` - Production server
-- ESLint 9.x with `eslint-config-next` 16.2.1 - Linting (config: `eslint.config.mjs`)
+- ESLint 10 with `eslint-config-next` 16.4.6 - Linting (config: `eslint.config.mjs`)
 - TypeScript compiler via `tsconfig.json` (`noEmit: true`, bundler module resolution)
 ## Key Dependencies
-- `@anthropic-ai/sdk` ^0.97.1 - Claude AI client for image analysis and text generation (`src/lib/anthropic.ts`)
-- `sharp` ^0.34.5 - Server-side image resizing before API calls (`src/agents/image-analyzer.ts`)
-- `uuid` ^13.0.0 - Session ID and question ID generation (`src/lib/session.ts`, `src/agents/question-generator.ts`)
+- `@anthropic-ai/sdk` ^1.9.0 - Claude AI client for image analysis and text generation (`src/lib/anthropic.ts`); model `claude-sonnet-5-5`, effort `low` (`src/lib/models.ts`)
+- `zod` ^4.6.7 - Agent output schemas, enforced via `zodOutputFormat` (`src/agents/schemas.ts`)
+- `sharp` ^0.35.5 - Server-side image resizing before API calls (`src/agents/image-analyzer.ts`)
+- `uuid` ^14.0.3 - Session ID and question ID generation (`src/lib/session.ts`, `src/agents/question-generator.ts`)
 - Node.js built-in `fs` and `path` - Local file storage for sessions and uploads (`src/lib/session.ts`)
 ## Configuration
 - `.env.local` - Required for local development (present but not read)
@@ -190,7 +207,7 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - Single quotes for strings throughout
 - No semicolons (no enforced rule, but semicolons are used where disambiguation needed)
 - Trailing commas present in arrays and objects
-- ESLint 9 with `eslint-config-next/core-web-vitals` and `eslint-config-next/typescript`
+- ESLint 10 with `eslint-config-next/core-web-vitals` and `eslint-config-next/typescript`
 - Config: `eslint.config.mjs`
 - Lint command: `npm run lint` (runs `eslint`)
 - Inline disable comment used where needed: `// eslint-disable-next-line @next/next/no-img-element`
@@ -208,8 +225,8 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - `useState('')` for error string, displayed via `<div className="alert alert-error">`
 - `.catch(() => setError('...')` on fetch chains for network failures
 - Pattern: check `res.ok` after fetch, set error if false, return early
-- Throw `new Error('Could not parse ... response')` when AI JSON extraction fails
-- AI response regex extraction: `text.match(/\{[\s\S]*\}/)` and `text.match(/\[[\s\S]*\]/)` with null check before parse
+- Agents throw `new Error('<Agent>: structured output was null ...')` when `messages.parse` returns no parsed output
+- No regex extraction of AI responses: agents use `anthropic.messages.parse` with `zodOutputFormat`
 ## Logging
 - No console.log statements observed in production code
 - Errors surface to the browser via React state (`setError`) or propagate as thrown exceptions
@@ -255,13 +272,15 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 | AnalyzePage | Trigger AI analysis on mount, display results, navigate forward | `src/app/session/[sessionId]/analyze/page.tsx` |
 | QuestionsPage | Trigger question generation, collect user answers, submit to /api/answers | `src/app/session/[sessionId]/questions/page.tsx` |
 | ListingPage | Trigger listing generation on mount, navigate to review | `src/app/session/[sessionId]/listing/page.tsx` |
-| ReviewPage | Load listing via GET, render editable form, PATCH on save/approve | `src/app/session/[sessionId]/review/page.tsx` |
+| ReviewPage | Load listing via GET, render editable form, PATCH on save/approve, publish | `src/app/session/[sessionId]/review/page.tsx` |
+| OrdersPage | Show orders from GET /api/orders | `src/app/session/[sessionId]/orders/page.tsx` |
 | upload route | Create session, write files to disk, return sessionId | `src/app/api/upload/route.ts` |
 | analyze route | Read session, call runImageAnalyzer(), persist result | `src/app/api/analyze/route.ts` |
 | questions route | Read session.analysis, call runQuestionGenerator(), persist | `src/app/api/questions/route.ts` |
 | answers route | Merge answers into session.questions, persist | `src/app/api/answers/route.ts` |
 | generate route | Read session, call runListingWriter() + runPriceEstimator() in parallel, persist | `src/app/api/generate/route.ts` |
-| publish route | Read session, call runRicardoPublisher() to push the listing live via MCP | `src/app/api/publish/route.ts` |
+| publish route | Read session, call runRicardoPublisher() (RicardoClient from `packages/ricardo-mcp`, stub); idempotency guard | `src/app/api/publish/route.ts` |
+| orders route | Return orders from the RicardoClient (stub) | `src/app/api/orders/route.ts` |
 | listing route | GET returns full session; PATCH updates listing and/or approved flag | `src/app/api/listing/route.ts` |
 | session lib | createSession / readSession / writeSession / getUploadDir | `src/lib/session.ts` |
 | anthropic lib | Singleton Anthropic client configured from env | `src/lib/anthropic.ts` |
@@ -269,13 +288,13 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 | QuestionGenerator agent | Send AnalysisResult to Claude, parse Question[] | `src/agents/question-generator.ts` |
 | ListingWriter agent | Send AnalysisResult + answered questions to Claude, parse RicardoListing (DE + FR) | `src/agents/listing-writer.ts` |
 | PriceEstimator agent | Look up comparable ricardo.ch offers via Claude web search, read link and price in code, let Claude pick matches; fallback: model-only PriceEstimate (CHF, `source: 'modell'`) | `src/agents/price-estimator.ts` |
-| RicardoPublisher agent | Push approved listing to Ricardo.ch via the MCP integration | `src/agents/ricardo-publisher.ts` |
+| RicardoPublisher agent | Upload images and create the listing via the RicardoClient from `packages/ricardo-mcp` (stub until partner API access) | `src/agents/ricardo-publisher.ts` |
 | SessionState | Authoritative session shape, all step outputs nested inside | `src/types/session.ts` |
 ## Pattern Overview
 - Session state is the single source of truth: `sessions/{uuid}.json` accumulates all step outputs
 - Each wizard step is a separate Next.js route under `src/app/session/[sessionId]/`
 - API routes are thin orchestrators: read session, call lib function, write session, return result
-- All AI calls are in `src/lib/` functions, not inline in routes
+- All AI calls are in `src/agents/` functions, not inline in routes
 - No React context, no global state manager — sessionId flows via URL params
 ## Layers
 - Purpose: Render wizard steps, collect user input, call API routes via fetch
@@ -310,8 +329,10 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - After analyze: `+ analysis`
 - After questions: `+ questions`
 - After answers: `questions[].answer` populated
-- After generate: `+ listing`
+- After generate: `+ listing`, `+ priceEstimate`
 - After approve: `+ approved: true`
+- After publish: `+ publishedListingId`, `+ publishedUrl`
+- Every agent call appends to `agentTrace`
 - All state lives in `sessions/{uuid}.json` on disk
 - No in-memory server state, no database, no cookies
 - Client components hold transient UI state only (useState)
@@ -320,8 +341,8 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - Examples: `src/types/session.ts` (definition), `src/lib/session.ts` (persistence)
 - Pattern: Passed by ID through URL; read/write by each API route
 - Purpose: Encapsulate all Claude API calls, prompt strings, and JSON parsing
-- Examples: `src/agents/image-analyzer.ts`, `src/agents/question-generator.ts`, `src/agents/listing-writer.ts`
-- Pattern: Each function takes typed inputs, calls `anthropic.messages.create`, parses JSON from response text with regex `match(/\{[\s\S]*\}/)` or `match(/\[[\s\S]*\]/)`, returns typed output
+- Examples: `src/agents/image-analyzer.ts`, `src/agents/question-generator.ts`, `src/agents/listing-writer.ts`, `src/agents/price-estimator.ts`
+- Pattern: Each function takes typed inputs, calls `anthropic.messages.parse` with `zodOutputFormat` (PriceEstimator additionally `messages.create` with the web search tool), returns `{ output, trace }`
 ## Entry Points
 - Location: `src/app/page.tsx`
 - Triggers: User navigating to `/`
@@ -336,7 +357,6 @@ Ein KI-gestütztes Verkaufstool, das aus Produktfotos vollständige, zweisprachi
 - **Session isolation:** Each session is isolated by UUID; no cross-session references
 - **No server-side navigation guard:** Pages do not check if prior steps are complete before triggering their API call — if a user visits `/session/{uuid}/review` directly without completing prior steps, the API returns the current session state (which may have no listing)
 ## Anti-Patterns
-### AI responses parsed with regex
 ### Pages trigger side-effectful API calls on every mount
 ## Error Handling
 - API routes check for required session fields before calling lib functions (e.g., `if (!session.analysis) return 400`)

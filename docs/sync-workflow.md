@@ -9,7 +9,7 @@ copy of this private repo to the public portfolio repo on every push to `main`.
 2. Build a `staging/` directory containing ONLY the allowlisted paths
 3. Verify the staged README hero, PNG signature and provenance link; abort before the public checkout changes if anything is missing
 4. Grep for `sk-ant-` and other credential patterns — abort if any match
-5. Run `secretlint` against the staging tree
+5. Run `secretlint` against the staging tree (Node 26, npm 11.6.2, `npm ci --ignore-scripts` in the staging tree)
 6. Clone the public repo using `PAT_PUBLIC_REPO`
 7. rsync staging content into the public repo (preserving `.git/`)
 8. Commit and push to `main` of the public repo
@@ -45,8 +45,8 @@ Everything NOT listed above. Notable exclusions:
 
 1. Edit `.github/workflows/push-to-public.yml`
 2. Add the new path under the `rsync -av --relative` block, e.g. `private/new-dir`
-4. Update this doc's allowlist table with a rationale
-5. Commit, push, watch the workflow run
+3. Update this doc's allowlist table with a rationale
+4. Commit, push, watch the workflow run
 
 Do NOT add paths casually. Every entry must have a documented rationale.
 
