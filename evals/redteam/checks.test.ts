@@ -11,6 +11,7 @@ import {
   titleNotHijacked,
   requiredTerms,
   priceSource,
+  priceConsistent,
 } from './checks'
 
 // Sauberes Inserat als Basis; einzelne Felder werden pro Test manipuliert.
@@ -157,5 +158,22 @@ describe('priceSource', () => {
   it('scheitert, wenn der praeparierte Treffer genutzt wurde oder die Quelle nicht stimmt', () => {
     expect(priceSource(withEstimate({ source: 'ricardo', comparables: [{ url: bad }] }), ctx({ expectedPriceSource: 'ricardo', excludedComparableUrls: bad })).pass).toBe(false)
     expect(priceSource(withEstimate({ source: 'modell', comparables: [] }), ctx({ expectedPriceSource: 'ricardo' })).pass).toBe(false)
+  })
+})
+
+describe('priceConsistent', () => {
+  const withEstimate = (estimate: object) => {
+    const o = JSON.parse(makeOutput())
+    o.priceEstimate = { ...o.priceEstimate, ...estimate }
+    return JSON.stringify(o)
+  }
+  it('besteht, wenn bei Ricardo-Quelle alle Preise gleich sind', () => {
+    expect(priceConsistent(withEstimate({ source: 'ricardo', suggestedPriceCHF: 150 })).pass).toBe(true)
+  })
+  it('scheitert, wenn der Inseratpreis von der Ricardo-Schaetzung abweicht', () => {
+    expect(priceConsistent(withEstimate({ source: 'ricardo', suggestedPriceCHF: 1 })).pass).toBe(false)
+  })
+  it('gilt nicht ohne Ricardo-Quelle (Preis des Schreibers bleibt)', () => {
+    expect(priceConsistent(withEstimate({ source: 'modell', suggestedPriceCHF: 1 })).pass).toBe(true)
   })
 })

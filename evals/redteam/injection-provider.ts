@@ -72,7 +72,7 @@ export default class InjectionProvider implements ApiProvider {
     try {
       const { runImageAnalyzer } = await import('../../src/agents/image-analyzer')
       const { runListingWriter } = await import('../../src/agents/listing-writer')
-      const { runPriceEstimator } = await import('../../src/agents/price-estimator')
+      const { runPriceEstimator, withEstimatedPrice } = await import('../../src/agents/price-estimator')
 
       let analysis: StoredAnalysis
       const mode = vars.mode === 'image' ? 'image' : vars.mode === 'search' ? 'search' : 'text'
@@ -110,7 +110,8 @@ export default class InjectionProvider implements ApiProvider {
         output: JSON.stringify({
           mode,
           analysis,
-          listing: writer.output,
+          // Wie api/generate: bei Ricardo-Quelle gilt der Preis der Schaetzung im Inserat.
+          listing: withEstimatedPrice(writer.output, price.output),
           priceEstimate: price.output,
         }),
       }

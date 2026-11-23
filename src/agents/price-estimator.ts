@@ -7,6 +7,7 @@ import {
   PriceEstimateSchema,
   type Comparable,
   type PriceEstimateZ,
+  type RicardoListing,
   type StoredAnalysis,
 } from './schemas'
 import type { AgentTraceEntry } from '@/types/session'
@@ -225,9 +226,16 @@ export function median(values: number[]): number {
   return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2
 }
 
+/** CHF-Betrag fuer Texte: ganze Franken ohne Rappen, sonst mit zwei Stellen. */
+function formatCHF(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2)
+}
+
 /**
  * Prueft den Vorschlag im Code gegen die gewaehlten Angebote: liegt er ausserhalb
  * von halbem Minimum bis anderthalbfachem Maximum, gilt der Median der Angebote.
+ * Die Begruendung des Modells faellt dann weg (sie nennt den verworfenen Betrag);
+ * an ihre Stelle tritt ein fester Hinweis auf den Marktmedian, ohne Modellaufruf.
  */
 export function checkAgainstComparables(
   decision: { suggestedPriceCHF: number; confidence: 'low' | 'medium' | 'high'; rationale: string },
@@ -237,13 +245,34 @@ export function checkAgainstComparables(
   const min = Math.min(...prices)
   const max = Math.max(...prices)
   const inRange = decision.suggestedPriceCHF >= min * 0.5 && decision.suggestedPriceCHF <= max * 1.5
+  if (inRange) {
+    return {
+      suggestedPriceCHF: decision.suggestedPriceCHF,
+      confidence: decision.confidence,
+      rationale: decision.rationale,
+      source: 'ricardo' as const,
+      comparables: used,
+    }
+  }
+  const price = Math.round(median(prices))
+  const range = min === max ? `CHF ${formatCHF(min)}` : `CHF ${formatCHF(min)} bis ${formatCHF(max)}`
+  const count = used.length === 1 ? 'des Vergleichsangebots' : `der ${used.length} Vergleichsangebote`
   return {
-    suggestedPriceCHF: inRange ? decision.suggestedPriceCHF : Math.round(median(prices)),
-    confidence: inRange ? decision.confidence : 'low',
-    rationale: inRange
-      ? decision.rationale
-      : `${decision.rationale} (Vorschlag lag ausserhalb der Vergleichsangebote; ersetzt durch deren Median.)`,
+    suggestedPriceCHF: price,
+    confidence: 'low' as const,
+    rationale: `Preis nach dem Median ${count} von ricardo.ch (${range}): CHF ${formatCHF(price)}. Der Vorschlag des Modells lag ausserhalb dieser Spanne und wurde ersetzt.`,
     source: 'ricardo' as const,
     comparables: used,
   }
+}
+
+/**
+ * Stuetzt sich die Schaetzung auf Ricardo-Vergleichsangebote, gilt ihr Preis fuer
+ * das Inserat in beiden Sprachen; sonst bleibt der Preis des ListingWriters.
+ * So haben Inseratpreise und Schaetzung immer denselben Wert, auch nach dem Preis-Guard.
+ */
+export function withEstimatedPrice(listing: RicardoListing, estimate: PriceEstimateZ): RicardoListing {
+  if (estimate.source !== 'ricardo') return listing
+  const price = estimate.suggestedPriceCHF
+  return { de: { ...listing.de, price }, fr: { ...listing.fr, price } }
 }

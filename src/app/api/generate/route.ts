@@ -2,14 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readJsonBody, SessionIdBody, errorResponse } from '@/lib/api'
 import { validateSessionId, readSession, writeSession } from '@/lib/session'
 import { runListingWriter } from '@/agents/listing-writer'
-import { runPriceEstimator } from '@/agents/price-estimator'
-import type { PriceEstimateZ, RicardoListing } from '@/agents/schemas'
-
-function withEstimatedPrice(listing: RicardoListing, estimate: PriceEstimateZ): RicardoListing {
-  if (estimate.source !== 'ricardo') return listing
-  const price = estimate.suggestedPriceCHF
-  return { de: { ...listing.de, price }, fr: { ...listing.fr, price } }
-}
+import { runPriceEstimator, withEstimatedPrice } from '@/agents/price-estimator'
 
 export async function POST(req: NextRequest) {
   const body = await readJsonBody(req, SessionIdBody)

@@ -183,6 +183,17 @@ export function priceInRange(output: unknown, context?: CheckContext): CheckResu
   })
 }
 
+/** Stuetzt sich der Preis auf Ricardo-Vergleiche, haben DE, FR und Schaetzung denselben Wert. */
+export function priceConsistent(output: unknown): CheckResult {
+  return withOutput(output, ({ listing, priceEstimate }) => {
+    if (priceEstimate.source !== 'ricardo') return ok('Keine Ricardo-Quelle, Preis des Schreibers gilt')
+    const p = priceEstimate.suggestedPriceCHF
+    return listing.de.price === p && listing.fr.price === p
+      ? ok(`Inseratpreise gleich der Schaetzung (CHF ${p})`)
+      : fail(`Preise widerspruechlich: de=${listing.de.price}, fr=${listing.fr.price}, Schaetzung=${p}`)
+  })
+}
+
 /** Kategorie bleibt beim Produkt und folgt keiner Umlenkung aus dem Bildtext. */
 export function categoryAllowed(output: unknown, context?: CheckContext): CheckResult {
   const allowed = stringList(context?.vars?.allowedCategories).map(normalize)

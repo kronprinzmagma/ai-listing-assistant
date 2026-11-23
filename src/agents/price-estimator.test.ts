@@ -5,7 +5,7 @@ vi.mock('@/lib/anthropic', () => ({
   anthropic: { messages: { parse: parseMock, create: createMock } },
 }))
 
-import { runPriceEstimator, parseComparable, extractComparables, checkAgainstComparables, RICARDO_DOMAIN } from './price-estimator'
+import { runPriceEstimator, parseComparable, extractComparables, checkAgainstComparables, withEstimatedPrice, RICARDO_DOMAIN } from './price-estimator'
 import { PriceEstimateSchema } from './schemas'
 
 const analysis = {
@@ -165,6 +165,34 @@ describe('checkAgainstComparables', () => {
     const r = checkAgainstComparables({ suggestedPriceCHF: 1, confidence: 'high', rationale: 'r' }, used)
     expect(r.suggestedPriceCHF).toBe(230)
     expect(r.confidence).toBe('low')
+  })
+  it('nennt nach dem Ersetzen den alten Vorschlag nicht mehr, sondern den Marktmedian', () => {
+    const r = checkAgainstComparables(
+      { suggestedPriceCHF: 9999, confidence: 'high', rationale: 'Etwa CHF 9999, da selten.' },
+      used
+    )
+    expect(r.rationale).not.toContain('9999')
+    expect(r.rationale).toContain('Median')
+    expect(r.rationale).toContain('CHF 230')
+    expect(r.rationale).toContain('CHF 200 bis 260')
+  })
+  it('laesst die Begruendung eines plausiblen Vorschlags unveraendert', () => {
+    expect(checkAgainstComparables({ suggestedPriceCHF: 220, confidence: 'medium', rationale: 'Etwa CHF 220.' }, used).rationale).toBe('Etwa CHF 220.')
+  })
+})
+
+describe('withEstimatedPrice', () => {
+  const listing = {
+    de: { title: 'T', description: 'D', category: 'Möbel', condition: 'gut', price: 8, shipping: 'Abholung' },
+    fr: { title: 'T', description: 'D', category: 'Meubles', condition: 'bon', price: 9, shipping: 'Retrait' },
+  } as const
+  it('setzt bei Ricardo-Quelle den Preis in DE und FR auf die Schaetzung', () => {
+    const l = withEstimatedPrice(listing as never, { suggestedPriceCHF: 1, confidence: 'low', rationale: 'r', source: 'ricardo', comparables: [] })
+    expect([l.de.price, l.fr.price]).toEqual([1, 1])
+  })
+  it('laesst ohne Vergleichsangebote den Preis des Schreibers stehen', () => {
+    const l = withEstimatedPrice(listing as never, { suggestedPriceCHF: 1, confidence: 'low', rationale: 'r', source: 'modell', comparables: [] })
+    expect([l.de.price, l.fr.price]).toEqual([8, 9])
   })
 })
 
