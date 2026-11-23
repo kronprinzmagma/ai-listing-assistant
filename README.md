@@ -170,7 +170,7 @@ docs/
 ## Tech stack
 
 - **Next.js 16**: App Router, TypeScript, server-side API routes
-- **@anthropic-ai/sdk**: Claude Sonnet 5.5 for all agent calls (graders: Sonnet 4.6); `zodOutputFormat` for structured outputs
+- **@anthropic-ai/sdk**: Claude Sonnet 5.5 for all agent calls and the eval graders; `zodOutputFormat` for structured outputs
 - **Zod**: Agent output schemas and validation contracts
 - **sharp**: Server-side image resizing before API calls
 - **Vitest**: Unit tests for agents, API routes, lib modules and graders

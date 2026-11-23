@@ -44,7 +44,7 @@ Fertig wenn: Alle Felder übersichtlich dargestellt, einzeln editierbar, Freigab
 ## Tech-Stack
 
 - **Framework:** Next.js 16 (App Router, TypeScript). Vor Code an Next.js die Hinweise in `AGENTS.md` lesen (APIs weichen vom Trainingsstand ab).
-- **KI:** `@anthropic-ai/sdk` – Claude Sonnet 5.5 (`src/lib/models.ts`, effort `low`) für Bildanalyse und Textgenerierung; die Eval-Grader bleiben vorerst auf Sonnet 4.6. Client mit Timeout 60 s (`src/lib/anthropic.ts`).
+- **KI:** `@anthropic-ai/sdk` – Claude Sonnet 5.5 (`src/lib/models.ts`, effort `low`) für Bildanalyse und Textgenerierung; die Eval-Grader ebenfalls (seit 2026-11-23, Idee 8). Client mit Timeout 60 s (`src/lib/anthropic.ts`).
 - **Bildverarbeitung:** `sharp` – Typprüfung beim Upload, resize auf max. 1500px vor dem API-Call
 - **Validierung:** `zod` – Agent-Ausgaben (`zodOutputFormat`) und Anfrage-Bodies der API-Routen
 - **Session-State:** JSON-Dateien lokal (`sessions/{uuid}.json`), keine Datenbank

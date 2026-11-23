@@ -2,7 +2,7 @@ import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { anthropic } from '../../src/lib/anthropic'
 import { DescriptionGraderOutputSchema, type GraderOutput } from './schemas'
 
-const MODEL = 'claude-sonnet-4-6'
+const MODEL = 'claude-sonnet-5-5'
 
 function buildDescriptionPrompt(
   description: string,

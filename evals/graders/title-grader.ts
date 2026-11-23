@@ -2,7 +2,7 @@ import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { anthropic } from '../../src/lib/anthropic'
 import { TitleGraderOutputSchema, type GraderOutput } from './schemas'
 
-const MODEL = 'claude-sonnet-4-6'
+const MODEL = 'claude-sonnet-5-5'
 
 function buildTitlePrompt(title: string, goldTitle: string): string {
   return `Du bewertest die Qualität eines Ricardo.ch-Inserat-Titels gegen eine Gold-Referenz.
