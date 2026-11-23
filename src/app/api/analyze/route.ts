@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { readJsonBody, SessionIdBody, errorResponse } from '@/lib/api'
 import { validateSessionId, readSession, writeSession } from '@/lib/session'
 import { runImageAnalyzer } from '@/agents/image-analyzer'
 
 export async function POST(req: NextRequest) {
-  const { sessionId } = (await req.json()) as { sessionId: string }
+  const body = await readJsonBody(req, SessionIdBody)
+  if (!body.ok) return body.response
+  const { sessionId } = body.data
 
   try {
     validateSessionId(sessionId)
@@ -27,7 +30,6 @@ export async function POST(req: NextRequest) {
     await writeSession(session)
     return NextResponse.json({ analysis: output })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return errorResponse('api/analyze', err)
   }
 }

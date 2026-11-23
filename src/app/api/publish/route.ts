@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { readJsonBody, SessionIdBody, errorResponse } from '@/lib/api'
 import { validateSessionId, readSession, writeSession } from '@/lib/session'
 import { TokenStore } from '@/lib/token-store'
 import { runRicardoPublisher } from '@/agents/ricardo-publisher'
@@ -7,7 +8,9 @@ import { mapCategoryToId } from '@/lib/category-map'
 const PARTNERSHIP_KEY = process.env.RICARDO_PARTNERSHIP_KEY ?? 'stub-key'
 
 export async function POST(req: NextRequest) {
-  const { sessionId } = (await req.json()) as { sessionId: string }
+  const body = await readJsonBody(req, SessionIdBody)
+  if (!body.ok) return body.response
+  const { sessionId } = body.data
 
   try {
     validateSessionId(sessionId)
@@ -56,7 +59,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ listingId: output.listingId, url: output.url })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return errorResponse('api/publish', err)
   }
 }

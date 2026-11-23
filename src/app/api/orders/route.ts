@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateSessionId } from '@/lib/session'
+import { errorResponse } from '@/lib/api'
 import { RicardoClient } from '../../../../packages/ricardo-mcp/src/client'
 
 const PARTNERSHIP_KEY = process.env.RICARDO_PARTNERSHIP_KEY ?? 'stub-key'
@@ -21,7 +22,6 @@ export async function GET(req: NextRequest) {
     const orders = await client.getPendingOrders()
     return NextResponse.json({ orders })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return errorResponse('api/orders', err)
   }
 }

@@ -13,6 +13,9 @@ function uploadsDir(): string {
   return path.join(process.cwd(), 'uploads')
 }
 
+/** Session-Datei existiert nicht (die Routen antworten darauf mit 404). */
+export class SessionNotFoundError extends Error {}
+
 export function validateSessionId(id: string): void {
   sessionFilePath(id)
 }
@@ -57,7 +60,7 @@ export async function readSession(id: string): Promise<SessionState> {
     return JSON.parse(content) as SessionState
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-      throw new Error(`Session ${id} not found`)
+      throw new SessionNotFoundError(`Session ${id} not found`)
     }
     throw new Error(`Session ${id} is corrupted: ${(err as Error).message}`)
   }

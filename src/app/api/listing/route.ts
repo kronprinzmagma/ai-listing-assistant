@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateSessionId, readSession, writeSession } from '@/lib/session'
 import { RicardoListingSchema } from '@/agents/schemas'
+import { z } from 'zod'
+import { readJsonBody, errorResponse } from '@/lib/api'
+
+// listing wird unten gegen RicardoListingSchema geprueft (eigene Fehlermeldung).
+const ListingPatchBody = z.object({
+  sessionId: z.string(),
+  listing: z.unknown().optional(),
+  approved: z.boolean().optional(),
+})
 
 export async function PATCH(req: NextRequest) {
-  const body = (await req.json()) as {
-    sessionId: string
-    listing?: unknown
-    approved?: boolean
-  }
-  const { sessionId, listing, approved } = body
+  const body = await readJsonBody(req, ListingPatchBody)
+  if (!body.ok) return body.response
+  const { sessionId, listing, approved } = body.data
 
   try {
     validateSessionId(sessionId)
@@ -30,8 +36,7 @@ export async function PATCH(req: NextRequest) {
     await writeSession(session)
     return NextResponse.json({ ok: true })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return errorResponse('api/listing', err)
   }
 }
 
@@ -49,7 +54,6 @@ export async function GET(req: NextRequest) {
     const session = await readSession(sessionId)
     return NextResponse.json({ session })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return errorResponse('api/listing', err)
   }
 }

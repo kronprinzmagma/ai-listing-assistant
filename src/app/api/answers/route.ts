@@ -1,21 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateSessionId, readSession, writeSession } from '@/lib/session'
 import { sanitizeUserAnswer } from '@/lib/sanitize'
+import { z } from 'zod'
+import { readJsonBody, errorResponse } from '@/lib/api'
+
+// answers: Objekt Frage-ID -> Antwort (kein Array, kein Einzelwert).
+const AnswersBody = z.object({
+  sessionId: z.string(),
+  answers: z.record(z.string(), z.unknown()),
+})
 
 export async function POST(req: NextRequest) {
-  const body = (await req.json()) as { sessionId: string; answers: unknown }
-  const { sessionId, answers } = body
+  const body = await readJsonBody(req, AnswersBody)
+  if (!body.ok) return body.response
+  const { sessionId, answers: answersMap } = body.data
 
   try {
     validateSessionId(sessionId)
   } catch {
     return NextResponse.json({ error: 'Invalid sessionId' }, { status: 400 })
   }
-
-  if (!answers || typeof answers !== 'object' || Array.isArray(answers)) {
-    return NextResponse.json({ error: 'Ungültige Antworten' }, { status: 400 })
-  }
-  const answersMap = answers as Record<string, unknown>
 
   try {
     const session = await readSession(sessionId)
@@ -32,7 +36,6 @@ export async function POST(req: NextRequest) {
     await writeSession(session)
     return NextResponse.json({ ok: true })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return errorResponse('api/answers', err)
   }
 }

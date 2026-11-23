@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { readJsonBody, SessionIdBody, errorResponse } from '@/lib/api'
 import { validateSessionId, readSession, writeSession } from '@/lib/session'
 import { runListingWriter } from '@/agents/listing-writer'
 import { runPriceEstimator } from '@/agents/price-estimator'
@@ -11,7 +12,9 @@ function withEstimatedPrice(listing: RicardoListing, estimate: PriceEstimateZ): 
 }
 
 export async function POST(req: NextRequest) {
-  const { sessionId } = (await req.json()) as { sessionId: string }
+  const body = await readJsonBody(req, SessionIdBody)
+  if (!body.ok) return body.response
+  const { sessionId } = body.data
 
   try {
     validateSessionId(sessionId)
@@ -61,7 +64,6 @@ export async function POST(req: NextRequest) {
       priceEstimate: priceResult.output,
     })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return errorResponse('api/generate', err)
   }
 }

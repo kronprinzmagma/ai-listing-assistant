@@ -86,4 +86,28 @@ describe('POST /api/analyze', () => {
     const reloaded = await readSession(s.id)
     expect(reloaded.agentTrace).toHaveLength(1) // single trace entry
   })
+
+  it('antwortet auf ungueltiges JSON mit 400', async () => {
+    const req = new Request('http://test/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{kaputt',
+    })
+    const res = await POST(req as never)
+    expect(res.status).toBe(400)
+    expect(parseMock).not.toHaveBeenCalled()
+  })
+
+  it('gibt einen API-Fehler nicht im Wortlaut an den Client weiter', async () => {
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    parseMock.mockRejectedValueOnce(new Error('401 authentication_error: invalid x-api-key (/srv/intern/pfad)'))
+    const s = await createSession()
+    s.photoPaths = ['/fake.jpg']
+    await writeSession(s)
+    const res = await POST(makeReq({ sessionId: s.id }) as never)
+    expect(res.status).toBe(500)
+    expect(JSON.stringify(await res.json())).not.toMatch(/api-key|srv|pfad|401/)
+    expect(errSpy).toHaveBeenCalled()
+    errSpy.mockRestore()
+  })
 })
