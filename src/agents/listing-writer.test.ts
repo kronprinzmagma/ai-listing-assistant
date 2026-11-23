@@ -6,6 +6,7 @@ vi.mock('@/lib/anthropic', () => ({
 }))
 
 import { runListingWriter } from './listing-writer'
+import { DATA_GUARD_SYSTEM } from '@/lib/models'
 import { RicardoListingSchema, RicardoListingDraftSchema, shortenTitle } from './schemas'
 import type { AnalysisResult } from './schemas'
 
@@ -86,6 +87,20 @@ describe('runListingWriter', () => {
     expect(firstCallContent).toContain('F: Alter?')
     expect(firstCallContent).toContain('A: 5 Jahre')
     expect(firstCallContent).not.toContain('Marke?\nA:') // unanswered questions not included
+  })
+
+  it('kennzeichnet die Antworten als verbindliche Angaben des Verkaeufers, die der Systemhinweis zulaesst', async () => {
+    parseMock
+      .mockResolvedValueOnce({ parsed_output: validListing, usage: { input_tokens: 1, output_tokens: 1 } })
+    await runListingWriter({
+      analysis,
+      questions: [{ id: 'q1', text: 'Wie wird uebergeben?', answer: 'Nur Abholung in Winterthur, bar bei Abholung' }],
+    })
+    const call = parseMock.mock.calls[0][0]
+    expect(JSON.stringify(call.messages)).toContain('Angaben des Verkäufers (Antworten auf Rückfragen, verbindlich)')
+    expect(call.system).toBe(DATA_GUARD_SYSTEM)
+    expect(DATA_GUARD_SYSTEM).toContain('«Angaben des Verkäufers»')
+    expect(DATA_GUARD_SYSTEM).toMatch(/verbindliche Angaben/)
   })
 
   it('uses zodOutputFormat on the generation call', async () => {

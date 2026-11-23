@@ -1,7 +1,7 @@
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import sharp from 'sharp'
 import { anthropic } from '@/lib/anthropic'
-import { AGENT_MODEL, AGENT_EFFORT } from '@/lib/models'
+import { AGENT_MODEL, AGENT_EFFORT, DATA_GUARD_SYSTEM } from '@/lib/models'
 import { AnalysisDraftSchema, AnalysisResultSchema, shortenTitle, type AnalysisResult } from './schemas'
 import type { AgentTraceEntry } from '@/types/session'
 
@@ -45,6 +45,8 @@ export async function runImageAnalyzer(
 
   const message = await anthropic.messages.parse({
     model: MODEL,
+    // Der Agent liest Text auf den Fotos als Erster: er gilt als Daten, nicht als Anweisung.
+    system: DATA_GUARD_SYSTEM,
     max_tokens: 8000,
     messages: [
       {

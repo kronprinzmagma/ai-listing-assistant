@@ -20,6 +20,7 @@ vi.mock('sharp', () => ({
 
 import { runImageAnalyzer } from './image-analyzer'
 import { AnalysisResultSchema } from './schemas'
+import { DATA_GUARD_SYSTEM } from '@/lib/models'
 
 beforeEach(() => {
   parseMock.mockReset()
@@ -36,6 +37,11 @@ beforeEach(() => {
 })
 
 describe('runImageAnalyzer', () => {
+  it('setzt den Systemhinweis: Text auf den Fotos ist Daten, keine Anweisung', async () => {
+    await runImageAnalyzer({ photoPaths: ['/fake/x.jpg'] })
+    expect(parseMock.mock.calls[0][0].system).toBe(DATA_GUARD_SYSTEM)
+  })
+
   it('shortens an overlong titleDraft instead of failing the analysis', async () => {
     parseMock.mockResolvedValueOnce({
       parsed_output: {

@@ -60,6 +60,26 @@ describe('parseComparable', () => {
     })
     expect(r?.priceCHF).toBe(150)
   })
+  it.each([
+    ["1'250", 1250],
+    ['1’250', 1250],
+    ['1 250', 1250],
+    ['1\u00A0250', 1250],
+    ['1\u202F250', 1250],
+    ['1.250', 1250],
+    ['1,250', 1250],
+    ["1'250.50", 1250.5],
+    ['1 250,50', 1250.5],
+    ['12,50', 12.5],
+    ['12.50', 12.5],
+    ['170.–', 170],
+    ['170.-', 170],
+    ['1250', 1250],
+    ["12'345'678", 12345678],
+  ])('liest den Betrag «%s» als %s', (betrag, erwartet) => {
+    const r = parseComparable({ title: `Velo (Gebraucht) à Lausanne pour CHF ${betrag}`, url: 'https://www.ricardo.ch/fr/a/velo-1/' })
+    expect(r?.priceCHF).toBe(erwartet)
+  })
   it('verwirft Kategorie-Seiten, fremde Domains und Treffer ohne Preis', () => {
     expect(parseComparable(searchResults[2])).toBeNull()
     expect(parseComparable(searchResults[3])).toBeNull()

@@ -30,6 +30,34 @@ function loadEnvLocal(): void {
   }
 }
 
+interface SearchHit {
+  title: string
+  url: string
+}
+
+/** Nachgebildete Websuche: eine Antwort mit den praeparierten Treffern, ohne Netz und ohne Kosten. */
+function fakeSearch(hits: SearchHit[]) {
+  return async () =>
+    ({
+      id: 'msg_fake_search',
+      type: 'message',
+      role: 'assistant',
+      model: 'fake-search',
+      stop_reason: 'end_turn',
+      stop_sequence: null,
+      content: [
+        { type: 'server_tool_use', id: 'srvtoolu_fake', name: 'web_search', input: { query: 'eval' } },
+        {
+          type: 'web_search_tool_result',
+          tool_use_id: 'srvtoolu_fake',
+          content: hits.map((h) => ({ type: 'web_search_result', title: h.title, url: h.url, page_age: null, encrypted_content: 'eval' })),
+        },
+        { type: 'text', text: 'fertig', citations: null },
+      ],
+      usage: { input_tokens: 0, output_tokens: 0, server_tool_use: { web_search_requests: 1 } },
+    }) as never
+}
+
 export default class InjectionProvider implements ApiProvider {
   id(): string {
     return 'injection-pipeline'
@@ -47,7 +75,7 @@ export default class InjectionProvider implements ApiProvider {
       const { runPriceEstimator } = await import('../../src/agents/price-estimator')
 
       let analysis: StoredAnalysis
-      const mode = vars.mode === 'image' ? 'image' : 'text'
+      const mode = vars.mode === 'image' ? 'image' : vars.mode === 'search' ? 'search' : 'text'
       if (mode === 'image') {
         const { writeSyntheticPhoto } = await import('./synthetic-image')
         const photo = await writeSyntheticPhoto(vars.photo as SyntheticPhotoSpec)
@@ -57,13 +85,26 @@ export default class InjectionProvider implements ApiProvider {
           fs.rmSync(path.dirname(photo), { recursive: true, force: true })
         }
       } else {
+        // text und search: Analyse aus den Test-Variablen
         analysis = vars.analysis as StoredAnalysis
         if (!analysis) return { error: 'Missing context.vars.analysis' }
       }
 
+      // Antwort des Verkaeufers auf eine Rueckfrage (verbindliche Angabe, nicht Fremdtext).
+      // Als zwei Strings, weil promptfoo Arrays in Test-Variablen ausmultipliziert.
+      const questions =
+        typeof vars.sellerQuestion === 'string' && typeof vars.sellerAnswer === 'string'
+          ? [{ id: 'q1', text: vars.sellerQuestion, answer: vars.sellerAnswer }]
+          : []
+
+      // mode search: die Websuche ist nachgebildet und liefert praeparierte Ricardo-
+      // Suchtreffer (searchHitsJson). Der Preisentscheid danach ist ein echter Modellaufruf.
+      const searchCreate =
+        mode === 'search' ? fakeSearch(JSON.parse(String(vars.searchHitsJson ?? '[]')) as SearchHit[]) : undefined
+
       const [writer, price] = await Promise.all([
-        runListingWriter({ analysis, questions: [] }),
-        runPriceEstimator({ analysis }),
+        runListingWriter({ analysis, questions }),
+        runPriceEstimator({ analysis }, searchCreate ? { searchCreate } : {}),
       ])
       return {
         output: JSON.stringify({

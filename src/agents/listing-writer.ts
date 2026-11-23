@@ -44,7 +44,7 @@ Analyse:
 - Titel-Entwurf: ${analysis.titleDraft}
 - Beschreibungs-Entwurf: ${analysis.descriptionDraft}
 
-${answeredQA ? `Zusätzliche Informationen:\n${answeredQA}` : ''}
+${answeredQA ? `Angaben des Verkäufers (Antworten auf Rückfragen, verbindlich):\n${answeredQA}` : ''}
 
 Wichtig:
 - Titel in BEIDEN Sprachen max. 60 Zeichen

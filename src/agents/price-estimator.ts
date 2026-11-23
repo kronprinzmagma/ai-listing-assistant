@@ -22,18 +22,27 @@ export const MAX_SEARCHES = 2
 export const MAX_COMPARABLES = 8
 
 const LISTING_URL = /^https:\/\/www\.ricardo\.ch\/(de|fr|it)\/a\/[^\s?#]+$/
+// Betrag: Tausender mit Apostroph, Leerzeichen (auch geschuetzt/schmal), Punkt oder
+// Komma, nur in Dreiergruppen; danach optional Rappen mit Punkt oder Komma.
+// «1'250», «1 250», «1.250», «1,250.50», «12,50», «170.–».
+const SEP = "['’ \u00A0\u202F.,]"
+const AMOUNT = `(\\d{1,3}(?:${SEP}\\d{3})+(?!\\d)|\\d+)(?:[.,](\\d{1,2})(?!\\d))?`
 // global: Verkaeufer schreiben selbst Preise in den Titel («NP für CHF 400»). Der
 // Angebotspreis ist der Zusatz der Plattform am Ende, darum zaehlt der letzte Treffer.
-const PRICE_IN_TITLE = /\b(?:für|pour|per)\s+CHF\s*([0-9][0-9'’.,]*)/gi
+const PRICE_IN_TITLE = new RegExp(`\\b(?:für|pour|per)\\s+CHF\\s*${AMOUNT}`, 'gi')
+
+/** Betrag aus Ganzzahlteil (mit Tausendertrennern) und optionalen Rappen. */
+export function parseAmount(integerPart: string, cents?: string): number {
+  const whole = Number(integerPart.replace(/\D/g, ''))
+  return cents ? whole + Number(`0.${cents}`) : whole
+}
 
 /** Liest Preis und Link aus einem Suchtreffer; null, wenn es kein Ricardo-Angebot mit Preis ist. */
 export function parseComparable(result: { title: string; url: string; page_age?: string | null }): Comparable | null {
   if (!LISTING_URL.test(result.url)) return null
   const match = [...result.title.matchAll(PRICE_IN_TITLE)].at(-1)
   if (!match) return null
-  // 1'250 / 1’250 / 1,250 -> 1250; 12.50 bleibt 12.5
-  const raw = match[1].replace(/['’]/g, '').replace(/,(?=\d{3}\b)/g, '').replace(/,/g, '.').replace(/\.$/, '')
-  const priceCHF = Number(raw)
+  const priceCHF = parseAmount(match[1], match[2])
   if (!Number.isFinite(priceCHF) || priceCHF <= 0) return null
   // Titel kuerzen und Steuerzeichen entfernen: der Text stammt von Verkaeufern.
   const title = result.title.replace(/[\x00-\x1F\x7F]/g, ' ').slice(0, 140)
@@ -61,6 +70,11 @@ export interface PriceEstimatorInput {
   analysis: StoredAnalysis
 }
 
+/** Aufruf fuer den Websuch-Durchgang. Austauschbar nur fuer Evals (evals/redteam/: praeparierte Suchtreffer). */
+export type SearchCreate = (params: Anthropic.MessageCreateParamsNonStreaming) => Promise<Anthropic.Message>
+
+const defaultSearchCreate: SearchCreate = (params) => anthropic.messages.create(params)
+
 function describeAnalysis(analysis: StoredAnalysis): string {
   return `- Objekt: ${analysis.object}
 - Zustand: ${analysis.condition}
@@ -69,7 +83,7 @@ function describeAnalysis(analysis: StoredAnalysis): string {
 - Beschreibung: ${analysis.descriptionDraft}`
 }
 
-async function searchComparables(analysis: StoredAnalysis) {
+async function searchComparables(analysis: StoredAnalysis, create: SearchCreate) {
   const messages: Anthropic.MessageParam[] = [
     {
       role: 'user',
@@ -84,7 +98,7 @@ ${describeAnalysis(analysis)}`,
   const content: Anthropic.ContentBlock[] = []
   // pause_turn: die API hat einen langen Server-Werkzeug-Turn unterbrochen; einmal fortsetzen.
   for (let round = 0; round < 2; round++) {
-    const message = await anthropic.messages.create({
+    const message = await create({
       model: MODEL,
       system: DATA_GUARD_SYSTEM,
       max_tokens: 4000,
@@ -110,7 +124,8 @@ ${describeAnalysis(analysis)}`,
 }
 
 export async function runPriceEstimator(
-  input: PriceEstimatorInput
+  input: PriceEstimatorInput,
+  deps: { searchCreate?: SearchCreate } = {}
 ): Promise<{ output: PriceEstimateZ; trace: AgentTraceEntry }> {
   const startedAt = Date.now()
   const { analysis } = input
@@ -120,7 +135,7 @@ export async function runPriceEstimator(
   let searches = 0
   let searchError: string | undefined
   try {
-    const found = await searchComparables(analysis)
+    const found = await searchComparables(analysis, deps.searchCreate ?? defaultSearchCreate)
     comparables = found.comparables
     searchTokens = { input: found.inputTokens, output: found.outputTokens }
     searches = found.searches
