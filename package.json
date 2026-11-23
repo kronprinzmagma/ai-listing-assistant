@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "eval": "tsx evals/run-eval.ts v1",
     "eval:v1": "tsx evals/run-eval.ts v1",

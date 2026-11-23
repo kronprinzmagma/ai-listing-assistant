@@ -76,3 +76,21 @@ describe('createSession + writeSession + readSession round-trip', () => {
     expect(files.some(f => f.endsWith('.tmp'))).toBe(false)
   })
 })
+
+// CodeQL js/path-injection (src/lib/session.ts): readSession und writeSession bilden den
+// Dateipfad nur aus einer geprueften Session-ID und oeffnen nie etwas ausserhalb von sessions/.
+describe('Pfadschutz in readSession und writeSession', () => {
+  it('readSession lehnt Pfad-Traversal ab, bevor eine Datei gelesen wird', async () => {
+    fs.writeFileSync(path.join(tmpRoot, 'geheim.json'), '{"id":"x"}')
+    await expect(readSession('../geheim')).rejects.toThrow(/Invalid sessionId/)
+  })
+  it('readSession lehnt einen absoluten Pfad ab', async () => {
+    await expect(readSession(path.join(tmpRoot, 'geheim'))).rejects.toThrow(/Invalid sessionId/)
+  })
+  it('writeSession schreibt bei ungueltiger ID nichts', async () => {
+    const s = await createSession()
+    await expect(writeSession({ ...s, id: '../ausserhalb' })).rejects.toThrow(/Invalid sessionId/)
+    expect(fs.existsSync(path.join(tmpRoot, 'ausserhalb.json'))).toBe(false)
+    expect(fs.existsSync(path.join(tmpRoot, 'ausserhalb.json.tmp'))).toBe(false)
+  })
+})

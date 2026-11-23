@@ -14,14 +14,22 @@ function uploadsDir(): string {
 }
 
 export function validateSessionId(id: string): void {
+  sessionFilePath(id)
+}
+
+// Prueft die Session-ID und liefert den Pfad der Session-Datei. Die Pruefung steht
+// bewusst in derselben Funktion wie der Pfad, den readSession/writeSession oeffnen:
+// So erkennt CodeQL (js/path-injection) den startsWith-Vergleich als Schutz.
+function sessionFilePath(id: string): string {
   if (typeof id !== 'string' || !UUID_V4_REGEX.test(id)) {
     throw new Error('Invalid sessionId format')
   }
-  const dir = sessionsDir()
+  const dir = path.resolve(sessionsDir())
   const resolved = path.resolve(dir, `${id}.json`)
   if (!resolved.startsWith(dir + path.sep)) {
     throw new Error('Invalid sessionId: path traversal detected')
   }
+  return resolved
 }
 
 async function ensureDirs(): Promise<void> {
@@ -43,8 +51,7 @@ export async function createSession(): Promise<SessionState> {
 }
 
 export async function readSession(id: string): Promise<SessionState> {
-  validateSessionId(id)
-  const filePath = path.join(sessionsDir(), `${id}.json`)
+  const filePath = sessionFilePath(id)
   try {
     const content = await fs.promises.readFile(filePath, 'utf-8')
     return JSON.parse(content) as SessionState
@@ -57,8 +64,8 @@ export async function readSession(id: string): Promise<SessionState> {
 }
 
 export async function writeSession(session: SessionState): Promise<void> {
+  const filePath = sessionFilePath(session.id)
   await ensureDirs()
-  const filePath = path.join(sessionsDir(), `${session.id}.json`)
   const tmpPath = `${filePath}.tmp`
   await fs.promises.writeFile(tmpPath, JSON.stringify(session, null, 2))
   await fs.promises.rename(tmpPath, filePath)
