@@ -1,5 +1,6 @@
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { anthropic } from '../../src/lib/anthropic'
+import { AGENT_EFFORT } from '../../src/lib/models'
 import { TitleGraderOutputSchema, type GraderOutput } from './schemas'
 
 const MODEL = 'claude-sonnet-5-5'
@@ -32,9 +33,11 @@ export async function gradeTitle(
 ): Promise<GraderOutput> {
   const message = await anthropic.messages.parse({
     model: MODEL,
-    max_tokens: 512,
+    // Sonnet 5.5 denkt auch ohne Angabe (effort high) und Denken zaehlt zu max_tokens;
+    // bei 512 brach die JSON-Antwort ab («Unterminated string», Eval-Lauf 2026-11-23).
+    max_tokens: 4000,
     messages: [{ role: 'user', content: buildTitlePrompt(title, goldTitle) }],
-    output_config: { format: zodOutputFormat(TitleGraderOutputSchema) },
+    output_config: { effort: AGENT_EFFORT, format: zodOutputFormat(TitleGraderOutputSchema) },
   })
   const parsed = message.parsed_output!
   return {

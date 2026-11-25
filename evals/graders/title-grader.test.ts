@@ -64,3 +64,16 @@ describe('gradeTitle', () => {
     await expect(gradeTitle('iPhone 14', 'Apple iPhone 14')).rejects.toThrow()
   })
 })
+
+// Abbruch «Unterminated string in JSON» im Eval-Lauf vom 2026-11-23: Sonnet 5.5 denkt
+// ohne effort mit hoher Stufe, und das Denken zaehlt zu max_tokens. Bei 512 Tokens
+// blieb dann zu wenig fuer die JSON-Antwort.
+describe('gradeTitle: Token-Budget', () => {
+  it('denkt mit effort low und laesst max_tokens Platz fuer Denken plus Antwort', async () => {
+    parseMock.mockResolvedValueOnce({ parsed_output: validTitleGraderOutput })
+    await gradeTitle('iPhone 14', 'Apple iPhone 14 128GB')
+    const request = parseMock.mock.calls[0][0]
+    expect(request.output_config.effort).toBe('low')
+    expect(request.max_tokens).toBeGreaterThanOrEqual(4000)
+  })
+})

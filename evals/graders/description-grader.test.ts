@@ -71,3 +71,14 @@ describe('gradeDescription', () => {
     expect(typeof result.suggestion).toBe('string')
   })
 })
+
+// Siehe title-grader.test.ts: Abbruch «Unterminated string in JSON» im Eval-Lauf vom 2026-11-23.
+describe('gradeDescription: Token-Budget', () => {
+  it('denkt mit effort low und laesst max_tokens Platz fuer Denken plus Antwort', async () => {
+    parseMock.mockResolvedValueOnce({ parsed_output: validDescriptionGraderOutput })
+    await gradeDescription('Beschreibung', 'Gold', 'iPhone 14, Smartphones, wie neu')
+    const request = parseMock.mock.calls[0][0]
+    expect(request.output_config.effort).toBe('low')
+    expect(request.max_tokens).toBeGreaterThanOrEqual(4000)
+  })
+})
